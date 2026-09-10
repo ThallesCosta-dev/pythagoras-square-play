@@ -297,8 +297,8 @@ function Index() {
                   {filled.b}/16
                 </text>
                 <text
-                  x={sx(1.5) + ((4 / 5) * 5 * U) / 2 - ((-3 / 5) * 5 * U) / 2 + (3 * U) / 1 - 3 * U}
-                  y={sy(2) - ((3 / 5) * 5 * U) / 2 - ((4 / 5) * 5 * U) / 2 + 2 * U}
+                  x={sx(3.5)}
+                  y={sy(3.5)}
                   textAnchor="middle"
                   fill="#a5b4fc"
                   fontSize={17}
