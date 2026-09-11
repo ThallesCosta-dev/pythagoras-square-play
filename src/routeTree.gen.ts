@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SimilaridadeRouteImport } from './routes/similaridade'
+import { Route as TrigonometriaRouteImport } from './routes/trigonometria'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SimilaridadeRoute = SimilaridadeRouteImport.update({
+  id: '/similaridade',
+  path: '/similaridade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrigonometriaRoute = TrigonometriaRouteImport.update({
+  id: '/trigonometria',
+  path: '/trigonometria',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/similaridade': typeof SimilaridadeRoute
+  '/trigonometria': typeof TrigonometriaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/similaridade': typeof SimilaridadeRoute
+  '/trigonometria': typeof TrigonometriaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/similaridade': typeof SimilaridadeRoute
+  '/trigonometria': typeof TrigonometriaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/similaridade' | '/trigonometria'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/similaridade' | '/trigonometria'
+  id: '__root__' | '/' | '/similaridade' | '/trigonometria'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SimilaridadeRoute: typeof SimilaridadeRoute
+  TrigonometriaRoute: typeof TrigonometriaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/similaridade': {
+      id: '/similaridade'
+      path: '/similaridade'
+      fullPath: '/similaridade'
+      preLoaderRoute: typeof SimilaridadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trigonometria': {
+      id: '/trigonometria'
+      path: '/trigonometria'
+      fullPath: '/trigonometria'
+      preLoaderRoute: typeof TrigonometriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SimilaridadeRoute: SimilaridadeRoute,
+  TrigonometriaRoute: TrigonometriaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
