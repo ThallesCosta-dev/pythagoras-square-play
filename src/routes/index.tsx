@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, Hand, Sparkles } from "lucide-react";
+import { RotateCcw, Hand, Sparkles, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { SiteNav } from "@/components/SiteNav";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -173,26 +175,7 @@ function Index() {
       <div className="pointer-events-none absolute right-0 bottom-0 h-[560px] w-[560px] rounded-full bg-cyan-accent/15 blur-[130px]" />
 
       {/* Header */}
-      <header className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand to-cyan-accent font-display text-lg font-bold text-white">
-            π
-          </div>
-          <div className="leading-tight">
-            <p className="font-display text-base font-bold tracking-tight">Mosaico de Pitágoras</p>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">
-              Teorema interativo
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={reset}
-          className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/80 transition hover:bg-white/5"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Reiniciar
-        </button>
-      </header>
+      <SiteNav />
 
       <main className="relative mx-auto max-w-6xl px-6 pt-2 pb-16">
         <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-accent">
@@ -215,9 +198,18 @@ function Index() {
           {/* Canvas */}
           <section className="lg:col-span-3">
             <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-              <p className="mb-4 text-[11px] uppercase tracking-[0.2em] text-white/40">
-                Triângulo retângulo · 3-4-5
-              </p>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">
+                  Triângulo retângulo · 3-4-5
+                </p>
+                <button
+                  onClick={reset}
+                  className="flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/5"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reiniciar
+                </button>
+              </div>
               <svg
                 viewBox={`0 0 ${12 * U} ${11 * U}`}
                 className="mx-auto w-full max-w-[560px] touch-none select-none"
@@ -425,6 +417,35 @@ function Index() {
               </ol>
             </div>
           </aside>
+        </div>
+
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+          <Link
+            to="/trigonometria"
+            className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-accent/50 hover:bg-white/[0.06]"
+          >
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">Próximo passo</p>
+            <p className="mt-2 flex items-center gap-2 font-display text-lg font-semibold">
+              Seno, cosseno e tangente
+              <ArrowRight className="h-4 w-4 text-cyan-accent transition group-hover:translate-x-1" />
+            </p>
+            <p className="mt-1 text-sm text-white/50">
+              O mesmo triângulo dentro de um círculo de raio 1.
+            </p>
+          </Link>
+          <Link
+            to="/similaridade"
+            className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-brand/50 hover:bg-white/[0.06]"
+          >
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">Aplicação moderna</p>
+            <p className="mt-2 flex items-center gap-2 font-display text-lg font-semibold">
+              Cosseno nos transformers
+              <ArrowRight className="h-4 w-4 text-brand transition group-hover:translate-x-1" />
+            </p>
+            <p className="mt-1 text-sm text-white/50">
+              Como modelos de linguagem medem parecença entre palavras.
+            </p>
+          </Link>
         </div>
       </main>
 
