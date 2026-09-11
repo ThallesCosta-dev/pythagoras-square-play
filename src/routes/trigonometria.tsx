@@ -198,7 +198,14 @@ function Trig() {
                   θ = {deg.toFixed(1)}°
                 </text>
                 {tanFinite && cos > 0 && (
-                  <text x={CX + R + 10} y={CY - (tan * R) / 2} fill="#f472b6" fontSize={14} fontWeight={700}>
+                  <text
+                    x={CX + R - 10}
+                    y={CY - (tan * R) / 2}
+                    textAnchor="end"
+                    fill="#f472b6"
+                    fontSize={14}
+                    fontWeight={700}
+                  >
                     tg θ = {fmt(tan)}
                   </text>
                 )}

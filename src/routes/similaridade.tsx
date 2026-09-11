@@ -141,8 +141,16 @@ function Similaridade() {
                 }}
               >
                 <defs>
-                  <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-                    <path d="M0,0 L9,4.5 L0,9 z" fill="context-stroke" />
+                  <marker
+                    id="ah"
+                    markerUnits="userSpaceOnUse"
+                    markerWidth="14"
+                    markerHeight="14"
+                    refX="11"
+                    refY="7"
+                    orient="auto"
+                  >
+                    <path d="M0,1 L13,7 L0,13 z" fill="context-stroke" />
                   </marker>
                 </defs>
 
@@ -220,8 +228,9 @@ function Similaridade() {
                 <circle cx={sx(q.x)} cy={sy(q.y)} r={12} fill="#6366f1" />
                 <circle cx={sx(q.x)} cy={sy(q.y)} r={22} fill="rgba(99,102,241,0.2)" />
                 <text
-                  x={sx(q.x) + 16}
-                  y={sy(q.y) + 22}
+                  x={Math.min(sx(q.x) + 16, S - 12)}
+                  y={sy(q.y) + 26}
+                  textAnchor={sx(q.x) + 16 > S - 130 ? "end" : "start"}
                   fill="#c7d2fe"
                   fontSize={14}
                   fontWeight={700}
