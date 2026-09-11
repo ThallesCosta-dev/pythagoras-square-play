@@ -418,6 +418,35 @@ function Index() {
             </div>
           </aside>
         </div>
+
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+          <Link
+            to="/trigonometria"
+            className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-accent/50 hover:bg-white/[0.06]"
+          >
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">Próximo passo</p>
+            <p className="mt-2 flex items-center gap-2 font-display text-lg font-semibold">
+              Seno, cosseno e tangente
+              <ArrowRight className="h-4 w-4 text-cyan-accent transition group-hover:translate-x-1" />
+            </p>
+            <p className="mt-1 text-sm text-white/50">
+              O mesmo triângulo dentro de um círculo de raio 1.
+            </p>
+          </Link>
+          <Link
+            to="/similaridade"
+            className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-brand/50 hover:bg-white/[0.06]"
+          >
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">Aplicação moderna</p>
+            <p className="mt-2 flex items-center gap-2 font-display text-lg font-semibold">
+              Cosseno nos transformers
+              <ArrowRight className="h-4 w-4 text-brand transition group-hover:translate-x-1" />
+            </p>
+            <p className="mt-1 text-sm text-white/50">
+              Como modelos de linguagem medem parecença entre palavras.
+            </p>
+          </Link>
+        </div>
       </main>
 
       {/* Drag ghost */}
