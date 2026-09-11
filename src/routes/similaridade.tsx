@@ -82,16 +82,21 @@ function Similaridade() {
   }, []);
 
   const rows = useMemo(() => {
-    const sims = KEYS.map((k) => ({ k, sim: cosSim(q, k), ang: 0 }));
-    sims.forEach((s) => {
-      s.ang = (Math.acos(Math.max(-1, Math.min(1, s.sim))) * 180) / Math.PI;
+    const sims = KEYS.map((k) => {
+      const sim = cosSim(q, k);
+      return {
+        k,
+        sim,
+        ang: (Math.acos(Math.max(-1, Math.min(1, sim))) * 180) / Math.PI,
+        exp: Math.exp(sim * temp),
+      };
     });
-    const exps = sims.map((s) => Math.exp(s.sim * temp));
-    const sum = exps.reduce((a, b) => a + b, 0);
-    return sims.map((s, i) => ({ ...s, w: exps[i] / sum }));
+    const sum = sims.reduce((a, s) => a + s.exp, 0) || 1;
+    return sims.map((s) => ({ ...s, w: s.exp / sum }));
   }, [q, temp]);
 
-  const best = rows.reduce((a, b) => (b.w > a.w ? b : a), rows[0]);
+  type Row = (typeof rows)[number];
+  const best = rows.reduce<Row | null>((a, b) => (a && a.w > b.w ? a : b), null);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-ink font-body text-foreground antialiased">
