@@ -198,9 +198,18 @@ function Index() {
           {/* Canvas */}
           <section className="lg:col-span-3">
             <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-              <p className="mb-4 text-[11px] uppercase tracking-[0.2em] text-white/40">
-                Triângulo retângulo · 3-4-5
-              </p>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">
+                  Triângulo retângulo · 3-4-5
+                </p>
+                <button
+                  onClick={reset}
+                  className="flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/5"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reiniciar
+                </button>
+              </div>
               <svg
                 viewBox={`0 0 ${12 * U} ${11 * U}`}
                 className="mx-auto w-full max-w-[560px] touch-none select-none"
