@@ -173,26 +173,7 @@ function Index() {
       <div className="pointer-events-none absolute right-0 bottom-0 h-[560px] w-[560px] rounded-full bg-cyan-accent/15 blur-[130px]" />
 
       {/* Header */}
-      <header className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand to-cyan-accent font-display text-lg font-bold text-white">
-            π
-          </div>
-          <div className="leading-tight">
-            <p className="font-display text-base font-bold tracking-tight">Mosaico de Pitágoras</p>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">
-              Teorema interativo
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={reset}
-          className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/80 transition hover:bg-white/5"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Reiniciar
-        </button>
-      </header>
+      <SiteNav />
 
       <main className="relative mx-auto max-w-6xl px-6 pt-2 pb-16">
         <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-accent">
