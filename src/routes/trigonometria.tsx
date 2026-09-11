@@ -287,7 +287,7 @@ function Trig() {
                 </li>
               </ul>
               <p className="mt-4 text-white/50">
-                Guarde o cosseno: na próxima página ele vira a medida de <em>parecença</em> entre
+                Guarde o cosseno: na próxima página ele vira a medida de <em>similaridade</em> entre
                 palavras dentro de um transformer.
               </p>
             </div>
