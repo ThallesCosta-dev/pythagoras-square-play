@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, Hand, Sparkles } from "lucide-react";
+import { RotateCcw, Hand, Sparkles, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { SiteNav } from "@/components/SiteNav";
 
 export const Route = createFileRoute("/")({
   head: () => ({
