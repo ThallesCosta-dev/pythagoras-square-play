@@ -45,6 +45,8 @@ function ProdutosVetoriais() {
   const crossFirst = a.x * b.y;
   const crossSecond = a.y * b.x;
   const cross = crossFirst - crossSecond;
+  const resultDirection = cross >= 0 ? -1 : 1;
+  const resultLength = cross === 0 ? 0 : Math.min(105, 42 + Math.abs(cross) * 3);
   const angle = Math.acos(
     Math.max(
       -1,
@@ -101,7 +103,7 @@ function ProdutosVetoriais() {
               <div className="flex flex-wrap items-center gap-4 text-sm">
                 <span className="text-catet1">A = ({a.x}, {a.y})</span>
                 <span className="text-catet2">B = ({b.x}, {b.y})</span>
-                <span className="text-cross-result">A × B = (0, 0, {cross})</span>
+                <span className="font-semibold text-cross-result">A × B = {cross}k̂</span>
               </div>
             </div>
             <svg
@@ -117,6 +119,9 @@ function ProdutosVetoriais() {
                 </marker>
                 <marker id="arrow-b" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
                   <path d="M0 1 L11 6 L0 11 Z" fill="var(--catet2)" />
+                </marker>
+                <marker id="arrow-cross" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                  <path d="M0 1 L11 6 L0 11 Z" fill="var(--cross-result)" />
                 </marker>
               </defs>
               {Array.from({ length: 11 }, (_, index) => index - 5).map((value) => (
@@ -160,21 +165,31 @@ function ProdutosVetoriais() {
               <text x={sx(b.x) + 12} y={sy(b.y) - 15} fill="var(--catet2)" fontSize="17" fontWeight="700">B</text>
 
               <g className="transition-opacity duration-300">
-                <circle cx={CENTER} cy={CENTER} r="15" fill="var(--cross-result)" fillOpacity="0.18" stroke="var(--cross-result)" strokeWidth="3" />
-                {cross > 0 && <circle cx={CENTER} cy={CENTER} r="4.5" fill="var(--cross-result)" />}
-                {cross < 0 && (
-                  <g stroke="var(--cross-result)" strokeWidth="3" strokeLinecap="round">
-                    <line x1={CENTER - 5} y1={CENTER - 5} x2={CENTER + 5} y2={CENTER + 5} />
-                    <line x1={CENTER + 5} y1={CENTER - 5} x2={CENTER - 5} y2={CENTER + 5} />
-                  </g>
+                <rect x="410" y="374" width="130" height="156" rx="8" fill="var(--ink)" fillOpacity="0.88" stroke="var(--cross-result)" strokeOpacity="0.65" />
+                <text x="475" y="398" textAnchor="middle" fill="var(--cross-result)" fontSize="14" fontWeight="700">RESULTANTE</text>
+                <line x1="475" y1="500" x2="475" y2="420" stroke="rgb(255 255 255 / 0.22)" strokeWidth="2" strokeDasharray="4 5" />
+                <text x="486" y="429" fill="rgb(255 255 255 / 0.5)" fontSize="12">+z</text>
+                {cross !== 0 ? (
+                  <line
+                    x1="475"
+                    y1="462"
+                    x2="475"
+                    y2={462 + resultDirection * resultLength}
+                    stroke="var(--cross-result)"
+                    strokeWidth="7"
+                    strokeLinecap="round"
+                    markerEnd="url(#arrow-cross)"
+                  />
+                ) : (
+                  <circle cx="475" cy="462" r="7" fill="var(--cross-result)" />
                 )}
-                {cross === 0 && <circle cx={CENTER} cy={CENTER} r="2.5" fill="var(--cross-result)" fillOpacity="0.5" />}
-                <text x={CENTER + 22} y={CENTER - 14} fill="var(--cross-result)" fontSize="15" fontWeight="700">A × B</text>
+                <circle cx="475" cy="462" r="5" fill="var(--cross-result)" />
+                <text x="475" y="518" textAnchor="middle" fill="var(--cross-result)" fontSize="15" fontWeight="700">{cross}k̂</text>
               </g>
             </svg>
             <p className="mt-3 text-center text-xs text-white/45">
-              O símbolo <span className="text-cross-result">⊙</span> indica a resultante saindo do
-              plano (para você) e <span className="text-cross-result">⊗</span> entrando no plano.
+              A seta rosa representa o eixo <span className="text-cross-result">z</span>, perpendicular
+              ao plano: para cima quando o resultado é positivo e para baixo quando é negativo.
             </p>
           </section>
 
@@ -209,7 +224,7 @@ function ProdutosVetoriais() {
                 <span className="text-catet1">{a.x}</span> × <span className="text-brand">{b.y}</span> − <span className="text-cyan-accent">{a.y}</span> × <span className="text-catet2">{b.x}</span> = <strong className="text-catet2">{crossFirst} − {crossSecond} = {cross}</strong>
               </p>
               <p className="mt-3 rounded bg-cross-result/15 px-3 py-2 text-center text-sm font-semibold text-cross-result">
-                Vetor resultante: A × B = (0, 0, {cross})
+                Resultante perpendicular: A × B = {cross}k̂
               </p>
               <p className="mt-3 text-xs text-white/45">O módulo, {Math.abs(cross)}, é a área do paralelogramo. O sinal indica o sentido da rotação de A para B.</p>
             </section>
