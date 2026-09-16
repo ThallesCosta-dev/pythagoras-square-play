@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProdutosVetoriaisRouteImport } from './routes/produtos-vetoriais'
 import { Route as SimilaridadeRouteImport } from './routes/similaridade'
 import { Route as TrigonometriaRouteImport } from './routes/trigonometria'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosVetoriaisRoute = ProdutosVetoriaisRouteImport.update({
+  id: '/produtos-vetoriais',
+  path: '/produtos-vetoriais',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SimilaridadeRoute = SimilaridadeRouteImport.update({
@@ -31,30 +37,39 @@ const TrigonometriaRoute = TrigonometriaRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/produtos-vetoriais': typeof ProdutosVetoriaisRoute
   '/similaridade': typeof SimilaridadeRoute
   '/trigonometria': typeof TrigonometriaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/produtos-vetoriais': typeof ProdutosVetoriaisRoute
   '/similaridade': typeof SimilaridadeRoute
   '/trigonometria': typeof TrigonometriaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/produtos-vetoriais': typeof ProdutosVetoriaisRoute
   '/similaridade': typeof SimilaridadeRoute
   '/trigonometria': typeof TrigonometriaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/similaridade' | '/trigonometria'
+  fullPaths: '/' | '/produtos-vetoriais' | '/similaridade' | '/trigonometria'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/similaridade' | '/trigonometria'
-  id: '__root__' | '/' | '/similaridade' | '/trigonometria'
+  to: '/' | '/produtos-vetoriais' | '/similaridade' | '/trigonometria'
+  id:
+    | '__root__'
+    | '/'
+    | '/produtos-vetoriais'
+    | '/similaridade'
+    | '/trigonometria'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProdutosVetoriaisRoute: typeof ProdutosVetoriaisRoute
   SimilaridadeRoute: typeof SimilaridadeRoute
   TrigonometriaRoute: typeof TrigonometriaRoute
 }
@@ -66,6 +81,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos-vetoriais': {
+      id: '/produtos-vetoriais'
+      path: '/produtos-vetoriais'
+      fullPath: '/produtos-vetoriais'
+      preLoaderRoute: typeof ProdutosVetoriaisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/similaridade': {
@@ -87,6 +109,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProdutosVetoriaisRoute: ProdutosVetoriaisRoute,
   SimilaridadeRoute: SimilaridadeRoute,
   TrigonometriaRoute: TrigonometriaRoute,
 }
