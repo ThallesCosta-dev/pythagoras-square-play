@@ -4,7 +4,7 @@ const items = [
   { to: "/", label: "Pitágoras" },
   { to: "/trigonometria", label: "Seno & Cosseno" },
   { to: "/similaridade", label: "Transformers" },
-  { to: "/produtos-vetoriais", label: "Produtos" },
+  { to: "/produtos-vetoriais", label: "Vetores e Matrizes" },
 ] as const;
 
 export function SiteNav() {
