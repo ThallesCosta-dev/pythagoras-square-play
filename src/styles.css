@@ -35,6 +35,7 @@
   --color-cyan-accent: var(--cyan-accent);
   --color-catet1: var(--catet1);
   --color-catet2: var(--catet2);
+  --color-cross-result: var(--cross-result);
   --color-ink: var(--ink);
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
@@ -46,6 +47,7 @@
   --cyan-accent: #22d3ee;
   --catet1: #fbbf24;
   --catet2: #34d399;
+  --cross-result: #f472b6;
   --ink: #0b1020;
 
   --background: oklch(0.155 0.03 275);
