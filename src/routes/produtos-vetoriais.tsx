@@ -32,10 +32,13 @@ const UNIT = 48;
 const sx = (x: number) => CENTER + x * UNIT;
 const sy = (y: number) => CENTER - y * UNIT;
 const clamp = (value: number) => Math.max(-5.1, Math.min(5.1, value));
+const clampSum = (value: number, other: number) =>
+  Math.max(-5, Math.min(5, Math.max(-5 - other, Math.min(5 - other, value))));
+const clampLabel = (value: number) => Math.max(32, Math.min(SIZE - 32, value));
 
 function ProdutosVetoriais() {
   const [a, setA] = useState<Vector>({ x: 4, y: 2 });
-  const [b, setB] = useState<Vector>({ x: 1, y: 4 });
+  const [b, setB] = useState<Vector>({ x: 1, y: 3 });
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragging = useRef<"a" | "b" | null>(null);
 
@@ -45,8 +48,8 @@ function ProdutosVetoriais() {
   const crossFirst = a.x * b.y;
   const crossSecond = a.y * b.x;
   const cross = crossFirst - crossSecond;
-  const resultDirection = cross >= 0 ? -1 : 1;
-  const resultLength = cross === 0 ? 0 : Math.min(105, 42 + Math.abs(cross) * 3);
+  const resultDirection = cross >= 0 ? 1 : -1;
+  const resultLength = cross === 0 ? 0 : Math.min(120, 38 + Math.abs(cross) * 4);
   const angle = Math.acos(
     Math.max(
       -1,
@@ -59,9 +62,12 @@ function ProdutosVetoriais() {
     const target = dragging.current;
     if (!svg || !target) return;
     const bounds = svg.getBoundingClientRect();
+    const other = target === "a" ? b : a;
+    const rawX = Math.round(clamp((((clientX - bounds.left) / bounds.width) * SIZE - CENTER) / UNIT));
+    const rawY = Math.round(clamp((CENTER - ((clientY - bounds.top) / bounds.height) * SIZE) / UNIT));
     const vector = {
-      x: Math.round(clamp((((clientX - bounds.left) / bounds.width) * SIZE - CENTER) / UNIT)),
-      y: Math.round(clamp((CENTER - ((clientY - bounds.top) / bounds.height) * SIZE) / UNIT)),
+      x: clampSum(rawX, other.x),
+      y: clampSum(rawY, other.y),
     };
     if (target === "a") setA(vector);
     else setB(vector);
@@ -92,7 +98,7 @@ function ProdutosVetoriais() {
           <span className="text-catet2">vetorial</span>
         </h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/60">
-          Arraste as pontas dos vetores. O produto escalar mede o alinhamento; o produto vetorial
+          Movimente os vetores colocando o mouse na ponta da seta e arrastando. O produto escalar mede o alinhamento; o produto vetorial
           mede a área orientada entre eles e aponta para fora do plano.
         </p>
 
@@ -114,14 +120,14 @@ function ProdutosVetoriais() {
               aria-label="Dois vetores arrastáveis e a resultante do produto vetorial em um plano cartesiano"
             >
               <defs>
-                <marker id="arrow-a" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-                  <path d="M0 1 L11 6 L0 11 Z" fill="var(--catet1)" />
+                <marker id="arrow-a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M0 0.5 L9 4.5 L0 8.5 Z" fill="var(--catet1)" />
                 </marker>
-                <marker id="arrow-b" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-                  <path d="M0 1 L11 6 L0 11 Z" fill="var(--catet2)" />
+                <marker id="arrow-b" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M0 0.5 L9 4.5 L0 8.5 Z" fill="var(--catet2)" />
                 </marker>
-                <marker id="arrow-cross" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-                  <path d="M0 1 L11 6 L0 11 Z" fill="var(--cross-result)" />
+                <marker id="arrow-cross" markerWidth="11" markerHeight="11" refX="10" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M0 0.5 L11 5.5 L0 10.5 Z" fill="var(--cross-result)" />
                 </marker>
               </defs>
               {Array.from({ length: 11 }, (_, index) => index - 5).map((value) => (
@@ -161,35 +167,42 @@ function ProdutosVetoriais() {
                 onPointerDown={(event) => { dragging.current = "b"; setFromPointer(event.clientX, event.clientY); }}
                 className="cursor-grab"
               />
-              <text x={sx(a.x) + 12} y={sy(a.y) - 15} fill="var(--catet1)" fontSize="17" fontWeight="700">A</text>
-              <text x={sx(b.x) + 12} y={sy(b.y) - 15} fill="var(--catet2)" fontSize="17" fontWeight="700">B</text>
+              <text x={clampLabel(sx(a.x) + 12)} y={clampLabel(sy(a.y) - 15)} fill="var(--catet1)" fontSize="17" fontWeight="700">A</text>
+              <text x={clampLabel(sx(b.x) + 12)} y={clampLabel(sy(b.y) - 15)} fill="var(--catet2)" fontSize="17" fontWeight="700">B</text>
 
-              <g className="transition-opacity duration-300">
-                <rect x="410" y="374" width="130" height="156" rx="8" fill="var(--ink)" fillOpacity="0.88" stroke="var(--cross-result)" strokeOpacity="0.65" />
-                <text x="475" y="398" textAnchor="middle" fill="var(--cross-result)" fontSize="14" fontWeight="700">RESULTANTE</text>
-                <line x1="475" y1="500" x2="475" y2="420" stroke="rgb(255 255 255 / 0.22)" strokeWidth="2" strokeDasharray="4 5" />
-                <text x="486" y="429" fill="rgb(255 255 255 / 0.5)" fontSize="12">+z</text>
+              <g className="transition-all duration-300">
                 {cross !== 0 ? (
-                  <line
-                    x1="475"
-                    y1="462"
-                    x2="475"
-                    y2={462 + resultDirection * resultLength}
-                    stroke="var(--cross-result)"
-                    strokeWidth="7"
-                    strokeLinecap="round"
-                    markerEnd="url(#arrow-cross)"
-                  />
+                  <>
+                    <line
+                      x1={CENTER}
+                      y1={CENTER}
+                      x2={CENTER + resultDirection * resultLength * 0.72}
+                      y2={CENTER - resultDirection * resultLength * 0.72}
+                      stroke="var(--cross-result)"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      markerEnd="url(#arrow-cross)"
+                    />
+                    <text
+                      x={clampLabel(CENTER + resultDirection * resultLength * 0.72 + 13)}
+                      y={clampLabel(CENTER - resultDirection * resultLength * 0.72 - 12)}
+                      textAnchor={resultDirection > 0 ? "start" : "end"}
+                      fill="var(--cross-result)"
+                      fontSize="16"
+                      fontWeight="700"
+                    >
+                      A × B = {cross}k̂
+                    </text>
+                  </>
                 ) : (
-                  <circle cx="475" cy="462" r="7" fill="var(--cross-result)" />
+                  <circle cx={CENTER} cy={CENTER} r="8" fill="var(--cross-result)" />
                 )}
-                <circle cx="475" cy="462" r="5" fill="var(--cross-result)" />
-                <text x="475" y="518" textAnchor="middle" fill="var(--cross-result)" fontSize="15" fontWeight="700">{cross}k̂</text>
+                <circle cx={CENTER} cy={CENTER} r="5" fill="var(--cross-result)" />
               </g>
             </svg>
             <p className="mt-3 text-center text-xs text-white/45">
-              A seta rosa representa o eixo <span className="text-cross-result">z</span>, perpendicular
-              ao plano: para cima quando o resultado é positivo e para baixo quando é negativo.
+              O vetor rosa representa <span className="text-cross-result">A × B</span>. Ele está desenhado
+              em perspectiva dentro do gráfico; matematicamente, aponta no eixo z, perpendicular ao plano.
             </p>
           </section>
 
