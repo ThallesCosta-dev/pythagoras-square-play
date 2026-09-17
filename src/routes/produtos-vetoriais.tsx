@@ -48,8 +48,7 @@ function ProdutosVetoriais() {
   const crossFirst = a.x * b.y;
   const crossSecond = a.y * b.x;
   const cross = crossFirst - crossSecond;
-  const resultDirection = cross >= 0 ? 1 : -1;
-  const resultLength = cross === 0 ? 0 : Math.min(120, 38 + Math.abs(cross) * 4);
+  const c = { x: a.x + b.x, y: a.y + b.y };
   const angle = Math.acos(
     Math.max(
       -1,
@@ -109,7 +108,7 @@ function ProdutosVetoriais() {
               <div className="flex flex-wrap items-center gap-4 text-sm">
                 <span className="text-catet1">A = ({a.x}, {a.y})</span>
                 <span className="text-catet2">B = ({b.x}, {b.y})</span>
-                <span className="font-semibold text-cross-result">A × B = {cross}k̂</span>
+                 <span className="font-semibold text-cross-result">C = ({c.x}, {c.y})</span>
               </div>
             </div>
             <svg
@@ -120,14 +119,14 @@ function ProdutosVetoriais() {
               aria-label="Dois vetores arrastáveis e a resultante do produto vetorial em um plano cartesiano"
             >
               <defs>
-                <marker id="arrow-a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
-                  <path d="M0 0.5 L9 4.5 L0 8.5 Z" fill="var(--catet1)" />
+                <marker id="arrow-a" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M0 0.5 L12 6 L0 11.5 Z" fill="var(--catet1)" />
                 </marker>
-                <marker id="arrow-b" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
-                  <path d="M0 0.5 L9 4.5 L0 8.5 Z" fill="var(--catet2)" />
+                <marker id="arrow-b" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M0 0.5 L12 6 L0 11.5 Z" fill="var(--catet2)" />
                 </marker>
-                <marker id="arrow-cross" markerWidth="11" markerHeight="11" refX="10" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">
-                  <path d="M0 0.5 L11 5.5 L0 10.5 Z" fill="var(--cross-result)" />
+                <marker id="arrow-c" markerWidth="13" markerHeight="13" refX="12" refY="6.5" orient="auto" markerUnits="userSpaceOnUse">
+                  <path d="M0 0.5 L13 6.5 L0 12.5 Z" fill="var(--cross-result)" />
                 </marker>
               </defs>
               {Array.from({ length: 11 }, (_, index) => index - 5).map((value) => (
@@ -154,55 +153,48 @@ function ProdutosVetoriais() {
                 strokeDasharray="7 6"
                 className="transition-all duration-300"
               />
-              <line x1={CENTER} y1={CENTER} x2={sx(a.x)} y2={sy(a.y)} stroke="var(--catet1)" strokeWidth="5" markerEnd="url(#arrow-a)" />
-              <line x1={CENTER} y1={CENTER} x2={sx(b.x)} y2={sy(b.y)} stroke="var(--catet2)" strokeWidth="5" markerEnd="url(#arrow-b)" />
-
               <circle
-                cx={sx(a.x)} cy={sy(a.y)} r="18" fill="var(--catet1)" fillOpacity="0.24"
+                cx={sx(a.x)} cy={sy(a.y)} r="20" fill="var(--catet1)" fillOpacity="0.12"
                 onPointerDown={(event) => { dragging.current = "a"; setFromPointer(event.clientX, event.clientY); }}
                 className="cursor-grab"
               />
               <circle
-                cx={sx(b.x)} cy={sy(b.y)} r="18" fill="var(--catet2)" fillOpacity="0.24"
+                cx={sx(b.x)} cy={sy(b.y)} r="20" fill="var(--catet2)" fillOpacity="0.12"
                 onPointerDown={(event) => { dragging.current = "b"; setFromPointer(event.clientX, event.clientY); }}
                 className="cursor-grab"
               />
+              <line x1={CENTER} y1={CENTER} x2={sx(a.x)} y2={sy(a.y)} stroke="var(--catet1)" strokeWidth="5" markerEnd="url(#arrow-a)" pointerEvents="none" />
+              <line x1={CENTER} y1={CENTER} x2={sx(b.x)} y2={sy(b.y)} stroke="var(--catet2)" strokeWidth="5" markerEnd="url(#arrow-b)" pointerEvents="none" />
               <text x={clampLabel(sx(a.x) + 12)} y={clampLabel(sy(a.y) - 15)} fill="var(--catet1)" fontSize="17" fontWeight="700">A</text>
               <text x={clampLabel(sx(b.x) + 12)} y={clampLabel(sy(b.y) - 15)} fill="var(--catet2)" fontSize="17" fontWeight="700">B</text>
 
-              <g className="transition-all duration-300">
-                {cross !== 0 ? (
-                  <>
-                    <line
-                      x1={CENTER}
-                      y1={CENTER}
-                      x2={CENTER + resultDirection * resultLength * 0.72}
-                      y2={CENTER - resultDirection * resultLength * 0.72}
-                      stroke="var(--cross-result)"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      markerEnd="url(#arrow-cross)"
-                    />
-                    <text
-                      x={clampLabel(CENTER + resultDirection * resultLength * 0.72 + 13)}
-                      y={clampLabel(CENTER - resultDirection * resultLength * 0.72 - 12)}
-                      textAnchor={resultDirection > 0 ? "start" : "end"}
-                      fill="var(--cross-result)"
-                      fontSize="16"
-                      fontWeight="700"
-                    >
-                      A × B = {cross}k̂
-                    </text>
-                  </>
-                ) : (
-                  <circle cx={CENTER} cy={CENTER} r="8" fill="var(--cross-result)" />
-                )}
-                <circle cx={CENTER} cy={CENTER} r="5" fill="var(--cross-result)" />
-              </g>
+              <line
+                x1={CENTER}
+                y1={CENTER}
+                x2={sx(c.x)}
+                y2={sy(c.y)}
+                stroke="var(--cross-result)"
+                strokeWidth="5"
+                strokeLinecap="round"
+                markerEnd="url(#arrow-c)"
+                pointerEvents="none"
+              />
+              <text
+                x={clampLabel(sx(c.x) + (c.x >= 4 ? -14 : c.x <= -4 ? 14 : 14))}
+                y={clampLabel(sy(c.y) + (c.y >= 4 ? 24 : c.y <= -4 ? -14 : -14))}
+                textAnchor={c.x >= 4 ? "end" : "start"}
+                fill="var(--cross-result)"
+                fontSize="16"
+                fontWeight="700"
+                pointerEvents="none"
+              >
+                C = ({c.x}, {c.y})
+              </text>
+              <circle cx={CENTER} cy={CENTER} r="5" fill="var(--cross-result)" />
             </svg>
             <p className="mt-3 text-center text-xs text-white/45">
-              O vetor rosa representa <span className="text-cross-result">A × B</span>. Ele está desenhado
-              em perspectiva dentro do gráfico; matematicamente, aponta no eixo z, perpendicular ao plano.
+               O vetor rosa <span className="text-cross-result">C = A + B</span> é a diagonal e termina
+               exatamente no vértice oposto do paralelogramo.
             </p>
           </section>
 
