@@ -180,12 +180,13 @@ function ProdutosVetoriais() {
                 pointerEvents="none"
               />
               <text
-                x={clampLabel(sx(c.x) + (c.x >= 0 ? 14 : -14))}
-                y={clampLabel(sy(c.y) + (c.y >= 0 ? -14 : 22))}
-                textAnchor={c.x >= 0 ? "start" : "end"}
+                x={clampLabel(sx(c.x) + (c.x >= 4 ? -14 : c.x <= -4 ? 14 : 14))}
+                y={clampLabel(sy(c.y) + (c.y >= 4 ? 24 : c.y <= -4 ? -14 : -14))}
+                textAnchor={c.x >= 4 ? "end" : "start"}
                 fill="var(--cross-result)"
                 fontSize="16"
                 fontWeight="700"
+                pointerEvents="none"
               >
                 C = ({c.x}, {c.y})
               </text>
