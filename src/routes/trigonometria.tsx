@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { PageShell, GradientText, PageLinks } from "@/components/PageShell";
 import { useWindowDrag, clientToSvg } from "@/hooks/use-window-drag";
 import { fmt, deg } from "@/lib/format";
-import { C, soft, white } from "@/lib/theme";
+import { C, soft, fg } from "@/lib/theme";
 
 export const Route = createFileRoute("/trigonometria")({
   head: () => ({
@@ -90,13 +90,13 @@ function Trig() {
         <>
           Arraste o ponto sobre o círculo. O cosseno é a sombra horizontal, o seno é a altura
           vertical — e, como o raio vale 1, Pitágoras vira{" "}
-          <span className="text-white">sen²θ + cos²θ = 1</span>.
+          <span className="text-fg">sen²θ + cos²θ = 1</span>.
         </>
       }
     >
       <div className="mt-10 grid grid-cols-1 items-start gap-8 lg:grid-cols-5">
         <section className="lg:col-span-3">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+          <div className="rounded-3xl border border-fg/10 bg-fg/[0.03] p-5 sm:p-7">
             <svg
               ref={svgRef}
               viewBox={`0 0 ${S} ${S}`}
@@ -109,9 +109,9 @@ function Trig() {
               }}
             >
               {/* eixos e círculo */}
-              <line x1={20} y1={CY} x2={S - 20} y2={CY} stroke={white(16)} />
-              <line x1={CX} y1={20} x2={CX} y2={S - 20} stroke={white(16)} />
-              <circle cx={CX} cy={CY} r={R} fill="none" stroke={white(22)} strokeWidth={1.5} />
+              <line x1={20} y1={CY} x2={S - 20} y2={CY} stroke={fg(16)} />
+              <line x1={CX} y1={20} x2={CX} y2={S - 20} stroke={fg(16)} />
+              <circle cx={CX} cy={CY} r={R} fill="none" stroke={fg(22)} strokeWidth={1.5} />
 
               {/* reta tangente em x = 1 */}
               <line
@@ -134,7 +134,7 @@ function Trig() {
               />
 
               {/* triângulo: cos (base) + sen (altura) */}
-              <polygon points={`${CX},${CY} ${px},${CY} ${px},${py}`} fill={white(5)} />
+              <polygon points={`${CX},${CY} ${px},${CY} ${px},${py}`} fill={fg(5)} />
               <line x1={CX} y1={CY} x2={px} y2={CY} stroke={C.catet1} strokeWidth={4} />
               <line x1={px} y1={CY} x2={px} y2={py} stroke={C.catet2} strokeWidth={4} />
               <line x1={CX} y1={CY} x2={px} y2={py} stroke={C.brandLight} strokeWidth={3} />
@@ -225,8 +225,8 @@ function Trig() {
                     aria-pressed={active}
                     className={`rounded-full border px-3 py-1.5 text-xs transition ${
                       active
-                        ? "border-cyan-accent/60 bg-cyan-accent/15 text-white"
-                        : "border-white/15 text-white/70 hover:bg-white/5"
+                        ? "border-cyan-accent/60 bg-cyan-accent/15 text-fg"
+                        : "border-fg/15 text-fg/70 hover:bg-fg/5"
                     }`}
                   >
                     {p.label}
@@ -242,9 +242,9 @@ function Trig() {
             {stats.map((m) => (
               <div
                 key={m.l}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center"
+                className="rounded-2xl border border-fg/10 bg-fg/[0.03] p-4 text-center"
               >
-                <p className="text-[11px] uppercase tracking-[0.18em] text-white/50">{m.l}</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-fg/50">{m.l}</p>
                 <p className="mt-1 font-display text-2xl font-bold" style={{ color: m.c }}>
                   {m.v}
                 </p>
@@ -253,24 +253,24 @@ function Trig() {
           </div>
 
           <div className="rounded-2xl border border-brand/50 bg-brand/10 p-5">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-fg/50">
               Pitágoras continua aqui
             </p>
             <p className="mt-3 text-center font-display text-2xl font-bold">
               <span className="text-catet2">{fmt(sin * sin)}</span>{" "}
-              <span className="text-white/50">+</span>{" "}
+              <span className="text-fg/50">+</span>{" "}
               <span className="text-catet1">{fmt(cos * cos)}</span>{" "}
-              <span className="text-white/50">=</span>{" "}
+              <span className="text-fg/50">=</span>{" "}
               <span className="text-brand">{fmt(sin * sin + cos * cos)}</span>
             </p>
-            <p className="mt-3 text-sm text-white/60">
+            <p className="mt-3 text-sm text-fg/60">
               O triângulo dentro do círculo tem hipotenusa 1. Os quadrados dos catetos (seno e
               cosseno) sempre somam o quadrado da hipotenusa.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/60">
-            <p className="font-display font-semibold text-white">O que cada um significa</p>
+          <div className="rounded-2xl border border-fg/10 bg-fg/[0.03] p-5 text-sm text-fg/60">
+            <p className="font-display font-semibold text-fg">O que cada um significa</p>
             <ul className="mt-3 space-y-2">
               <li>
                 <span className="text-catet1">cosseno</span> = cateto adjacente ÷ hipotenusa (o
@@ -286,7 +286,7 @@ function Trig() {
                 mesmo quando o ponto está do lado esquerdo.
               </li>
             </ul>
-            <p className="mt-4 text-white/50">
+            <p className="mt-4 text-fg/50">
               Guarde o cosseno: na próxima página ele vira a medida de <em>similaridade</em> entre
               palavras dentro de um transformer.
             </p>

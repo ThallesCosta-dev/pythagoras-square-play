@@ -49,13 +49,21 @@
   --color-orange: var(--orange);
   --color-emerald: var(--emerald);
   --color-ink: var(--ink);
+  --color-fg: var(--fg);
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
 }
 
+/*
+ * Tema escuro (padrão). O script inline em __root.tsx define data-theme="light"
+ * ou "dark" antes da primeira pintura, a partir do localStorage ou do sistema.
+ * O TSX referencia estas variáveis via src/lib/theme.ts.
+ */
 :root {
+  color-scheme: dark;
   --radius: 0.75rem;
-  /* Paleta do app. O TSX referencia estas variáveis via src/lib/theme.ts. */
+  /* Paleta do app */
+  --fg: #ffffff;
   --brand: #6366f1;
   --cyan-accent: #22d3ee;
   --catet1: #fbbf24;
@@ -87,6 +95,43 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.585 0.233 277);
+}
+
+/* Tema claro: mesmas cores em tons mais escuros para manter contraste sobre fundo claro. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --fg: #0b1020;
+  --brand: #4f46e5;
+  --cyan-accent: #0e7490;
+  --catet1: #b45309;
+  --catet2: #047857;
+  --vec-sum: #be185d;
+  --brand-light: #6366f1;
+  --brand-text: #4338ca;
+  --amber: #d97706;
+  --orange: #c2410c;
+  --emerald: #059669;
+  --ink: #f5f6fb;
+
+  --background: oklch(0.985 0.004 275);
+  --foreground: oklch(0.2 0.03 275);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.03 275);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.03 275);
+  --primary: oklch(0.51 0.23 277);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.94 0.01 275);
+  --secondary-foreground: oklch(0.2 0.03 275);
+  --muted: oklch(0.94 0.01 275);
+  --muted-foreground: oklch(0.45 0.03 270);
+  --accent: oklch(0.94 0.01 275);
+  --accent-foreground: oklch(0.2 0.03 275);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0 0 0 / 10%);
+  --input: oklch(0 0 0 / 15%);
+  --ring: oklch(0.51 0.23 277);
 }
 
 @layer base {

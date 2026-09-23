@@ -26,7 +26,7 @@ export function PageShell({ eyebrow, title, intro, children }: PageShellProps) {
         <h1 className="font-display text-[clamp(2rem,5.5vw,4rem)] font-bold leading-[1] tracking-tight">
           {title}
         </h1>
-        {intro && <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/60">{intro}</p>}
+        {intro && <p className="mt-4 max-w-2xl text-lg leading-relaxed text-fg/60">{intro}</p>}
         {children}
       </main>
     </div>
@@ -37,7 +37,7 @@ export function GradientText({ children, alt = false }: { children: ReactNode; a
   return (
     <span
       className={`bg-gradient-to-r bg-clip-text text-transparent ${
-        alt ? "from-cyan-accent via-brand to-catet1" : "from-white via-brand to-cyan-accent"
+        alt ? "from-cyan-accent via-brand to-catet1" : "from-fg via-brand to-cyan-accent"
       }`}
     >
       {children}
@@ -63,11 +63,11 @@ export function PageLinks({ links }: { links: PageLink[] }) {
           <Link
             key={link.to}
             to={link.to}
-            className={`group rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:bg-white/[0.06] ${
+            className={`group rounded-2xl border border-fg/10 bg-fg/[0.03] p-5 transition hover:bg-fg/[0.06] ${
               cyan ? "hover:border-cyan-accent/50" : "hover:border-brand/50"
             }`}
           >
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">{link.eyebrow}</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-fg/50">{link.eyebrow}</p>
             <p className="mt-2 flex items-center gap-2 font-display text-lg font-semibold">
               {link.title}
               <ArrowRight
@@ -76,7 +76,7 @@ export function PageLinks({ links }: { links: PageLink[] }) {
                 }`}
               />
             </p>
-            <p className="mt-1 text-sm text-white/50">{link.desc}</p>
+            <p className="mt-1 text-sm text-fg/50">{link.desc}</p>
           </Link>
         );
       })}
