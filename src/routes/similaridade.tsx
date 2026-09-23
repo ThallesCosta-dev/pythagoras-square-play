@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { SiteNav } from "@/components/SiteNav";
+import { useMemo, useRef, useState } from "react";
+import { PageShell, GradientText, PageLinks } from "@/components/PageShell";
+import { useWindowDrag, clientToSvg } from "@/hooks/use-window-drag";
+import { fmt } from "@/lib/format";
+import { C, soft, white } from "@/lib/theme";
 
 export const Route = createFileRoute("/similaridade")({
   head: () => ({
@@ -17,8 +20,6 @@ export const Route = createFileRoute("/similaridade")({
         content:
           "Do cosseno do triângulo à atenção do transformer: vetores de palavras no plano e pesos de atenção calculados ao vivo.",
       },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Similaridade,
@@ -27,59 +28,66 @@ export const Route = createFileRoute("/similaridade")({
 const S = 540;
 const CX = S / 2;
 const CY = S / 2;
-const U = 46; // px per unit
+const U = 46; // px por unidade
+const LIMIT = 5.3;
 
 const sx = (x: number) => CX + x * U;
 const sy = (y: number) => CY - y * U;
 
-type Vec = { id: string; word: string; x: number; y: number; color: string };
+type Vec2 = { x: number; y: number };
+type Key = Vec2 & { id: string; word: string; color: string };
 
-const KEYS: Vec[] = [
-  { id: "gato", word: "gato", x: 3.4, y: 2.2, color: "#fbbf24" },
-  { id: "cachorro", word: "cachorro", x: 3.0, y: 2.7, color: "#f59e0b" },
-  { id: "felino", word: "felino", x: 3.6, y: 1.9, color: "#fb923c" },
-  { id: "carro", word: "carro", x: -2.6, y: 2.9, color: "#34d399" },
-  { id: "motor", word: "motor", x: -3.2, y: 2.1, color: "#10b981" },
-  { id: "banco", word: "banco", x: 1.0, y: -3.4, color: "#22d3ee" },
+const KEYS: Key[] = [
+  { id: "gato", word: "gato", x: 3.4, y: 2.2, color: C.catet1 },
+  { id: "cachorro", word: "cachorro", x: 3.0, y: 2.7, color: C.amber },
+  { id: "felino", word: "felino", x: 3.6, y: 1.9, color: C.orange },
+  { id: "carro", word: "carro", x: -2.6, y: 2.9, color: C.catet2 },
+  { id: "motor", word: "motor", x: -3.2, y: 2.1, color: C.emerald },
+  { id: "banco", word: "banco", x: 1.0, y: -3.4, color: C.cyan },
 ];
 
-const dot = (a: { x: number; y: number }, b: { x: number; y: number }) => a.x * b.x + a.y * b.y;
-const norm = (a: { x: number; y: number }) => Math.hypot(a.x, a.y);
-const cosSim = (a: { x: number; y: number }, b: { x: number; y: number }) => {
+const dot = (a: Vec2, b: Vec2) => a.x * b.x + a.y * b.y;
+const norm = (a: Vec2) => Math.hypot(a.x, a.y);
+const cosSim = (a: Vec2, b: Vec2) => {
   const d = norm(a) * norm(b);
   return d === 0 ? 0 : dot(a, b) / d;
 };
+const clamp = (v: number) => Math.max(-LIMIT, Math.min(LIMIT, v));
+
+function Arrowhead({ id, color }: { id: string; color: string }) {
+  return (
+    <marker
+      id={id}
+      markerUnits="userSpaceOnUse"
+      markerWidth="14"
+      markerHeight="14"
+      refX="11"
+      refY="7"
+      orient="auto"
+    >
+      <path d="M0,1 L13,7 L0,13 z" fill={color} />
+    </marker>
+  );
+}
 
 function Similaridade() {
-  const [q, setQ] = useState({ x: 3.2, y: 2.0 });
+  const [q, setQ] = useState<Vec2>({ x: 3.2, y: 2.0 });
   const [temp, setTemp] = useState(4);
+  const [dragging, setDragging] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const dragging = useRef(false);
 
   const setFromPointer = (clientX: number, clientY: number) => {
     const svg = svgRef.current;
     if (!svg) return;
-    const r = svg.getBoundingClientRect();
-    const x = (((clientX - r.left) / r.width) * S - CX) / U;
-    const y = (CY - ((clientY - r.top) / r.height) * S) / U;
-    const clamp = (v: number) => Math.max(-5.3, Math.min(5.3, v));
-    setQ({ x: clamp(x), y: clamp(y) });
+    const { x, y } = clientToSvg(svg, clientX, clientY, S, S);
+    setQ({ x: clamp((x - CX) / U), y: clamp((CY - y) / U) });
   };
 
-  useEffect(() => {
-    const move = (e: PointerEvent) => {
-      if (dragging.current) setFromPointer(e.clientX, e.clientY);
-    };
-    const up = () => {
-      dragging.current = false;
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    return () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-    };
-  }, []);
+  useWindowDrag(dragging, {
+    onMove: (e) => setFromPointer(e.clientX, e.clientY),
+    onUp: () => setDragging(false),
+    onCancel: () => setDragging(false),
+  });
 
   const rows = useMemo(() => {
     const sims = KEYS.map((k) => {
@@ -97,226 +105,253 @@ function Similaridade() {
 
   type Row = (typeof rows)[number];
   const best = rows.reduce<Row | null>((a, b) => (a && a.w > b.w ? a : b), null);
+  const qLen = norm(q);
+  const showWedge = best !== null && qLen > 0.05;
+
+  const setCoord = (axis: "x" | "y", value: string) => {
+    const n = Number(value);
+    if (Number.isFinite(n)) setQ((prev) => ({ ...prev, [axis]: clamp(n) }));
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-ink font-body text-foreground antialiased">
-      <div className="pointer-events-none absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-brand/25 blur-[120px]" />
-      <div className="pointer-events-none absolute right-0 bottom-0 h-[560px] w-[560px] rounded-full bg-cyan-accent/15 blur-[130px]" />
-
-      <SiteNav />
-
-      <main className="relative mx-auto max-w-6xl px-6 pb-16">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-accent">
-          Do cosseno à atenção · vetores no plano
-        </p>
-        <h1 className="font-display text-[clamp(2rem,5vw,3.6rem)] font-bold leading-[1] tracking-tight">
-          <span className="bg-gradient-to-r from-white via-brand to-cyan-accent bg-clip-text text-transparent">
-            Similaridade de cosseno
-          </span>{" "}
-          <span className="bg-gradient-to-r from-cyan-accent via-brand to-catet1 bg-clip-text text-transparent">
-            nos transformers
-          </span>
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/60">
+    <PageShell
+      eyebrow="Do cosseno à atenção · vetores no plano"
+      title={
+        <>
+          <GradientText>Similaridade de cosseno</GradientText>{" "}
+          <GradientText alt>nos transformers</GradientText>
+        </>
+      }
+      intro={
+        <>
           Num modelo de linguagem, cada palavra vira um vetor. Para decidir em quais palavras
-          prestar atenção, o modelo mede o <span className="text-white">cosseno do ângulo</span>{" "}
-          entre a consulta e cada palavra: mesmo sentido → cosseno perto de 1. Arraste a seta roxa.
-        </p>
-
-        <div className="mt-10 grid grid-cols-1 items-start gap-8 lg:grid-cols-5">
-          <section className="lg:col-span-3">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
-              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-white/40">
-                Espaço de embeddings (2 dimensões)
-              </p>
-              <svg
-                ref={svgRef}
-                viewBox={`0 0 ${S} ${S}`}
-                className="mx-auto w-full max-w-[560px] touch-none select-none"
-                role="img"
-                aria-label="Vetores de palavras num plano cartesiano com o vetor de consulta arrastável"
-                onPointerDown={(e) => {
-                  dragging.current = true;
-                  setFromPointer(e.clientX, e.clientY);
-                }}
-              >
-                <defs>
-                  <marker
-                    id="ah"
-                    markerUnits="userSpaceOnUse"
-                    markerWidth="14"
-                    markerHeight="14"
-                    refX="11"
-                    refY="7"
-                    orient="auto"
-                  >
-                    <path d="M0,1 L13,7 L0,13 z" fill="context-stroke" />
-                  </marker>
-                </defs>
-
-                {Array.from({ length: 11 }).map((_, i) => {
-                  const v = i - 5;
-                  return (
-                    <g key={v}>
-                      <line
-                        x1={sx(v)}
-                        y1={sy(-5.5)}
-                        x2={sx(v)}
-                        y2={sy(5.5)}
-                        stroke="rgba(255,255,255,0.05)"
-                      />
-                      <line
-                        x1={sx(-5.5)}
-                        y1={sy(v)}
-                        x2={sx(5.5)}
-                        y2={sy(v)}
-                        stroke="rgba(255,255,255,0.05)"
-                      />
-                    </g>
-                  );
-                })}
-                <line x1={sx(-5.6)} y1={CY} x2={sx(5.6)} y2={CY} stroke="rgba(255,255,255,0.2)" />
-                <line x1={CX} y1={sy(-5.6)} x2={CX} y2={sy(5.6)} stroke="rgba(255,255,255,0.2)" />
-
-                {/* angle wedge between q and best match */}
-                {best && (
-                  <path
-                    d={`M ${CX} ${CY} L ${sx((q.x / norm(q)) * 1.6)} ${sy((q.y / norm(q)) * 1.6)} A ${
-                      1.6 * U
-                    } ${1.6 * U} 0 0 ${
-                      q.x * best.k.y - q.y * best.k.x > 0 ? 1 : 0
-                    } ${sx((best.k.x / norm(best.k)) * 1.6)} ${sy((best.k.y / norm(best.k)) * 1.6)} Z`}
-                    fill="rgba(99,102,241,0.18)"
-                  />
-                )}
-
-                {rows.map(({ k, w }) => (
-                  <g key={k.id}>
-                    <line
-                      x1={CX}
-                      y1={CY}
-                      x2={sx(k.x)}
-                      y2={sy(k.y)}
-                      stroke={k.color}
-                      strokeWidth={2 + w * 8}
-                      opacity={0.35 + w * 0.65}
-                      markerEnd="url(#ah)"
-                    />
-                    <text
-                      x={sx(k.x) + (k.x >= 0 ? 10 : -10)}
-                      y={sy(k.y) - 8}
-                      textAnchor={k.x >= 0 ? "start" : "end"}
-                      fill={k.color}
-                      fontSize={14}
-                      fontWeight={700}
-                    >
-                      {k.word}
-                    </text>
-                  </g>
+          prestar atenção, o modelo compara a consulta com cada palavra. Aqui usamos o{" "}
+          <span className="text-white">cosseno do ângulo</span> entre elas: mesmo sentido → cosseno
+          perto de 1. Arraste a seta roxa.
+        </>
+      }
+    >
+      <div className="mt-10 grid grid-cols-1 items-start gap-8 lg:grid-cols-5">
+        <section className="lg:col-span-3">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-white/50">
+              Espaço de embeddings (2 dimensões)
+            </p>
+            <svg
+              ref={svgRef}
+              viewBox={`0 0 ${S} ${S}`}
+              className="mx-auto w-full max-w-[560px] touch-none select-none"
+              role="img"
+              aria-label="Vetores de palavras num plano cartesiano com o vetor de consulta arrastável; use os campos numéricos abaixo para mover a consulta pelo teclado"
+              onPointerDown={(e) => {
+                setDragging(true);
+                setFromPointer(e.clientX, e.clientY);
+              }}
+            >
+              <defs>
+                {KEYS.map((k) => (
+                  <Arrowhead key={k.id} id={`ah-${k.id}`} color={k.color} />
                 ))}
+                <Arrowhead id="ah-q" color={C.brandLight} />
+              </defs>
 
-                {/* query vector */}
-                <line
-                  x1={CX}
-                  y1={CY}
-                  x2={sx(q.x)}
-                  y2={sy(q.y)}
-                  stroke="#a5b4fc"
-                  strokeWidth={5}
-                  markerEnd="url(#ah)"
+              {Array.from({ length: 11 }).map((_, i) => {
+                const v = i - 5;
+                return (
+                  <g key={v}>
+                    <line x1={sx(v)} y1={sy(-5.5)} x2={sx(v)} y2={sy(5.5)} stroke={white(5)} />
+                    <line x1={sx(-5.5)} y1={sy(v)} x2={sx(5.5)} y2={sy(v)} stroke={white(5)} />
+                  </g>
+                );
+              })}
+              <line x1={sx(-5.6)} y1={CY} x2={sx(5.6)} y2={CY} stroke={white(20)} />
+              <line x1={CX} y1={sy(-5.6)} x2={CX} y2={sy(5.6)} stroke={white(20)} />
+
+              {/* setor entre q e a palavra mais parecida */}
+              {showWedge && (
+                <path
+                  d={`M ${CX} ${CY} L ${sx((q.x / qLen) * 1.6)} ${sy((q.y / qLen) * 1.6)} A ${
+                    1.6 * U
+                  } ${1.6 * U} 0 0 ${q.x * best.k.y - q.y * best.k.x > 0 ? 1 : 0} ${sx(
+                    (best.k.x / norm(best.k)) * 1.6,
+                  )} ${sy((best.k.y / norm(best.k)) * 1.6)} Z`}
+                  fill={soft(C.brand, 18)}
                 />
-                <circle cx={sx(q.x)} cy={sy(q.y)} r={12} fill="#6366f1" />
-                <circle cx={sx(q.x)} cy={sy(q.y)} r={22} fill="rgba(99,102,241,0.2)" />
-                <text
-                  x={Math.min(sx(q.x) + 16, S - 12)}
-                  y={sy(q.y) + 26}
-                  textAnchor={sx(q.x) + 16 > S - 130 ? "end" : "start"}
-                  fill="#c7d2fe"
-                  fontSize={14}
-                  fontWeight={700}
-                >
-                  consulta ({q.x.toFixed(1)}, {q.y.toFixed(1)})
-                </text>
-              </svg>
-              <p className="mt-3 text-sm text-white/50">
-                Repare: só o <em>ângulo</em> importa. Alongue a seta sem girá-la e o cosseno não
-                muda — por isso o cosseno mede sentido, não tamanho.
-              </p>
-            </div>
-          </section>
+              )}
 
-          <aside className="space-y-4 lg:col-span-2">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <div className="flex items-baseline justify-between">
-                <p className="font-display font-semibold">Atenção do modelo</p>
-                <p className="text-xs text-white/40">softmax(cos · escala)</p>
-              </div>
-              <div className="mt-4 space-y-3">
-                {[...rows]
-                  .sort((a, b) => b.w - a.w)
-                  .map(({ k, sim, ang, w }) => (
-                    <div key={k.id}>
-                      <div className="flex items-baseline justify-between text-sm">
-                        <span className="font-medium" style={{ color: k.color }}>
-                          {k.word}
-                        </span>
-                        <span className="tabular-nums text-white/50">
-                          cos {sim.toFixed(2)} · {ang.toFixed(0)}° ·{" "}
-                          <span className="text-white">{(w * 100).toFixed(0)}%</span>
-                        </span>
-                      </div>
-                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
-                        <div
-                          className="h-full rounded-full transition-all duration-200"
-                          style={{ width: `${w * 100}%`, backgroundColor: k.color }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-              </div>
-              <label className="mt-5 block text-xs uppercase tracking-[0.18em] text-white/40">
-                Nitidez da atenção ({temp.toFixed(1)})
-              </label>
-              <input
-                type="range"
-                min={0.5}
-                max={12}
-                step={0.1}
-                value={temp}
-                onChange={(e) => setTemp(Number(e.target.value))}
-                className="mt-2 w-full accent-[#6366f1]"
+              {rows.map(({ k, w }) => (
+                <g key={k.id}>
+                  <line
+                    x1={CX}
+                    y1={CY}
+                    x2={sx(k.x)}
+                    y2={sy(k.y)}
+                    stroke={k.color}
+                    strokeWidth={2 + w * 8}
+                    opacity={0.35 + w * 0.65}
+                    markerEnd={`url(#ah-${k.id})`}
+                  />
+                  <text
+                    x={sx(k.x) + (k.x >= 0 ? 10 : -10)}
+                    y={sy(k.y) - 8}
+                    textAnchor={k.x >= 0 ? "start" : "end"}
+                    fill={k.color}
+                    fontSize={14}
+                    fontWeight={700}
+                  >
+                    {k.word}
+                  </text>
+                </g>
+              ))}
+
+              {/* vetor de consulta */}
+              <line
+                x1={CX}
+                y1={CY}
+                x2={sx(q.x)}
+                y2={sy(q.y)}
+                stroke={C.brandLight}
+                strokeWidth={5}
+                markerEnd="url(#ah-q)"
               />
-            </div>
+              <circle cx={sx(q.x)} cy={sy(q.y)} r={12} fill={C.brand} />
+              <circle cx={sx(q.x)} cy={sy(q.y)} r={22} fill={soft(C.brand, 20)} />
+              <text
+                x={Math.min(sx(q.x) + 16, S - 12)}
+                y={sy(q.y) + 26}
+                textAnchor={sx(q.x) + 16 > S - 130 ? "end" : "start"}
+                fill={C.brandText}
+                fontSize={14}
+                fontWeight={700}
+              >
+                consulta ({fmt(q.x, 1)}, {fmt(q.y, 1)})
+              </text>
+            </svg>
 
-            <div className="rounded-2xl border border-brand/50 bg-brand/10 p-5">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-white/40">Leitura</p>
-              <p className="mt-2 text-sm text-white/70">
-                A consulta aponta mais para <strong className="text-white">{best?.k.word}</strong>{" "}
-                (ângulo de {best?.ang.toFixed(0)}°), então o modelo puxa{" "}
-                {(best ? best.w * 100 : 0).toFixed(0)}% da informação dessa palavra ao formar a
-                próxima representação.
-              </p>
+            <div className="mt-4 flex flex-wrap items-end gap-3 text-sm">
+              <span className="text-white/60">Consulta pelo teclado:</span>
+              {(["x", "y"] as const).map((axis) => (
+                <label key={axis} className="flex items-center gap-2 text-white/60">
+                  <span className="font-mono text-brand-text">{axis}</span>
+                  <input
+                    type="number"
+                    step={0.1}
+                    min={-LIMIT}
+                    max={LIMIT}
+                    value={Number(q[axis].toFixed(1))}
+                    onChange={(e) => setCoord(axis, e.target.value)}
+                    className="w-20 rounded-md border border-white/15 bg-white/5 px-2 py-1 text-white tabular-nums focus:border-brand focus:outline-none"
+                  />
+                </label>
+              ))}
             </div>
+            <p className="mt-3 text-sm text-white/60">
+              Repare: aqui só o <em>ângulo</em> importa. Alongue a seta sem girá-la e o cosseno não
+              muda — o cosseno mede sentido, não tamanho.
+            </p>
+          </div>
+        </section>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/60">
-              <p className="font-display font-semibold text-white">Por que isso é o mesmo cosseno</p>
-              <p className="mt-2">
-                cos θ = (q · k) ÷ (|q| · |k|). O produto escalar no numerador e as normas — que
-                vêm direto de Pitágoras, |v| = √(x² + y²) — no denominador.
-              </p>
-              <p className="mt-3">
-                No transformer, a atenção usa q · k dividido por √d e passa por softmax. Normalizar
-                pelos comprimentos dá exatamente a similaridade de cosseno: um número entre −1
-                (sentidos opostos) e 1 (mesma direção).
-              </p>
-              <p className="mt-3 text-white/45">
-                Aqui usamos 2 dimensões para caber na tela; um modelo real usa centenas ou milhares
-                — a conta é idêntica.
-              </p>
+        <aside className="space-y-4 lg:col-span-2">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <div className="flex items-baseline justify-between">
+              <p className="font-display font-semibold">Atenção do modelo</p>
+              <p className="text-xs text-white/50">softmax(cos · escala)</p>
             </div>
-          </aside>
-        </div>
-      </main>
-    </div>
+            <div className="mt-4 space-y-3" aria-live="polite">
+              {[...rows]
+                .sort((a, b) => b.w - a.w)
+                .map(({ k, sim, ang, w }) => (
+                  <div key={k.id}>
+                    <div className="flex items-baseline justify-between text-sm">
+                      <span className="font-medium" style={{ color: k.color }}>
+                        {k.word}
+                      </span>
+                      <span className="tabular-nums text-white/60">
+                        cos {fmt(sim)} · {fmt(ang, 0)}° ·{" "}
+                        <span className="text-white">{fmt(w * 100, 0)}%</span>
+                      </span>
+                    </div>
+                    <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full rounded-full transition-all duration-200"
+                        style={{ width: `${w * 100}%`, backgroundColor: k.color }}
+                      />
+                    </div>
+                  </div>
+                ))}
+            </div>
+            <label
+              htmlFor="atencao-escala"
+              className="mt-5 block text-xs uppercase tracking-[0.18em] text-white/50"
+            >
+              Nitidez da atenção ({fmt(temp, 1)})
+            </label>
+            <input
+              id="atencao-escala"
+              type="range"
+              min={0.5}
+              max={12}
+              step={0.1}
+              value={temp}
+              onChange={(e) => setTemp(Number(e.target.value))}
+              className="mt-2 w-full accent-brand"
+            />
+          </div>
+
+          <div className="rounded-2xl border border-brand/50 bg-brand/10 p-5">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">Leitura</p>
+            <p className="mt-2 text-sm text-white/70">
+              A consulta aponta mais para <strong className="text-white">{best?.k.word}</strong>{" "}
+              (ângulo de {fmt(best?.ang ?? 0, 0)}°), então o modelo puxa{" "}
+              {fmt(best ? best.w * 100 : 0, 0)}% da informação dessa palavra ao formar a próxima
+              representação.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/60">
+            <p className="font-display font-semibold text-white">Por que isso é o mesmo cosseno</p>
+            <p className="mt-2">
+              cos θ = (q · k) ÷ (|q| · |k|). O produto escalar no numerador e as normas — que vêm
+              direto de Pitágoras, |v| = √(x² + y²) — no denominador.
+            </p>
+            <p className="mt-3">
+              No transformer real, a atenção usa q · k dividido por √d e passa por softmax, sem
+              dividir pelos comprimentos: lá o tamanho dos vetores também pesa. Nesta demo
+              normalizamos de propósito para isolar o ângulo, e o que sobra é exatamente a
+              similaridade de cosseno: um número entre −1 (sentidos opostos) e 1 (mesma direção).
+            </p>
+            <p className="mt-3 text-white/50">
+              Aqui usamos 2 dimensões para caber na tela; um modelo real usa centenas ou milhares —
+              a conta é idêntica.
+            </p>
+          </div>
+        </aside>
+      </div>
+
+      <PageLinks
+        links={[
+          {
+            to: "/produtos-vetoriais",
+            eyebrow: "Próximo passo",
+            title: "Produto escalar e vetorial",
+            desc: "O produto escalar de perto, e o seu irmão perpendicular.",
+          },
+          {
+            to: "/trigonometria",
+            eyebrow: "Passo anterior",
+            title: "Seno, cosseno e tangente",
+            desc: "De onde vem o cosseno que usamos aqui.",
+          },
+          {
+            to: "/",
+            eyebrow: "Começo",
+            title: "Teorema de Pitágoras",
+            desc: "Volte ao mosaico de quadradinhos.",
+            accent: "brand",
+          },
+        ]}
+      />
+    </PageShell>
   );
 }

@@ -2,7 +2,14 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* Fontes auto-hospedadas (sem requisições ao Google Fonts) */
+@import "@fontsource/space-grotesk/400.css";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -35,7 +42,12 @@
   --color-cyan-accent: var(--cyan-accent);
   --color-catet1: var(--catet1);
   --color-catet2: var(--catet2);
-  --color-cross-result: var(--cross-result);
+  --color-vec-sum: var(--vec-sum);
+  --color-brand-light: var(--brand-light);
+  --color-brand-text: var(--brand-text);
+  --color-amber: var(--amber);
+  --color-orange: var(--orange);
+  --color-emerald: var(--emerald);
   --color-ink: var(--ink);
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
@@ -43,11 +55,17 @@
 
 :root {
   --radius: 0.75rem;
+  /* Paleta do app. O TSX referencia estas variáveis via src/lib/theme.ts. */
   --brand: #6366f1;
   --cyan-accent: #22d3ee;
   --catet1: #fbbf24;
   --catet2: #34d399;
-  --cross-result: #f472b6;
+  --vec-sum: #f472b6;
+  --brand-light: #a5b4fc;
+  --brand-text: #c7d2fe;
+  --amber: #f59e0b;
+  --orange: #fb923c;
+  --emerald: #10b981;
   --ink: #0b1020;
 
   --background: oklch(0.155 0.03 275);
@@ -69,19 +87,6 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.585 0.233 277);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.19 0.032 273);
-  --sidebar-foreground: oklch(0.97 0.005 260);
-  --sidebar-primary: oklch(0.585 0.233 277);
-  --sidebar-primary-foreground: oklch(0.97 0.005 260);
-  --sidebar-accent: oklch(0.24 0.03 272);
-  --sidebar-accent-foreground: oklch(0.97 0.005 260);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.585 0.233 277);
 }
 
 @layer base {

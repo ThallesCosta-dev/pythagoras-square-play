@@ -1,0 +1,9 @@
+# Normaliza fim de linha para LF em todos os checkouts, para que o Prettier
+# e o ESLint se comportem igual no Windows, macOS e Linux.
+* text=auto eol=lf
+
+*.ico binary
+*.png binary
+*.jpg binary
+*.woff binary
+*.woff2 binary
