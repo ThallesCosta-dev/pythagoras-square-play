@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { RotateCcw, Hand, Sparkles, Undo2 } from "lucide-react";
 import { PageShell, GradientText, PageLinks } from "@/components/PageShell";
 import { useWindowDrag, clientToSvg } from "@/hooks/use-window-drag";
-import { C, soft, white } from "@/lib/theme";
+import { C, soft, fg } from "@/lib/theme";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -223,15 +223,15 @@ function Index() {
       <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-5">
         {/* Canvas */}
         <section className="lg:col-span-3">
-          <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+          <div className="relative rounded-3xl border border-fg/10 bg-fg/[0.03] p-6 sm:p-8">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-fg/50">
                 Triângulo retângulo · {SIDES.a.n}-{SIDES.b.n}-{SIDES.c.n}
               </p>
               <button
                 type="button"
                 onClick={reset}
-                className="flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/5"
+                className="flex items-center gap-2 rounded-full border border-fg/15 px-3 py-1.5 text-xs text-fg/80 transition hover:bg-fg/5"
               >
                 <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                 Reiniciar
@@ -255,7 +255,7 @@ function Index() {
                       fill={
                         isHover ? (hover.ok ? SIDES[s].soft : soft(zoneColor, 12)) : "transparent"
                       }
-                      stroke={isHover ? zoneColor : white(18)}
+                      stroke={isHover ? zoneColor : fg(18)}
                       strokeWidth={isHover ? 3 : 2}
                       className="transition-all"
                     />
@@ -267,9 +267,9 @@ function Index() {
                         <polygon
                           key={k}
                           points={points}
-                          fill={isFilled ? SIDES[s].color : white(4)}
+                          fill={isFilled ? SIDES[s].color : fg(4)}
                           fillOpacity={isFilled ? 0.9 : 1}
-                          stroke={isFilled ? white(35) : white(10)}
+                          stroke={isFilled ? fg(35) : fg(10)}
                           strokeWidth={1}
                           className={`${isLast ? "tile-pop" : ""} ${removable ? "cursor-pointer" : ""}`}
                           onClick={removable ? () => removeLast(s) : undefined}
@@ -363,7 +363,7 @@ function Index() {
                 {filled.c}/{total("c")}
               </text>
             </svg>
-            <p className="mt-4 flex items-center gap-2 text-sm text-white/60">
+            <p className="mt-4 flex items-center gap-2 text-sm text-fg/60">
               <Hand className="h-4 w-4 text-cyan-accent" aria-hidden />
               Arraste os quadradinhos da bandeja para o quadrado da mesma cor, ou toque neles.
             </p>
@@ -376,9 +376,9 @@ function Index() {
         {/* Coluna lateral */}
         <aside className="space-y-4 lg:col-span-2">
           {/* Bandeja */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="rounded-2xl border border-fg/10 bg-fg/[0.03] p-5">
             <p className="font-display font-semibold">Bandeja de quadradinhos</p>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm text-fg/60">
               Cada quadradinho vale 1 unidade de área. Arraste, toque ou pressione Enter para
               encaixar.
             </p>
@@ -390,7 +390,7 @@ function Index() {
                   <div
                     key={s}
                     className={`flex items-center gap-3 rounded-xl border p-3 transition ${
-                      done ? "border-white/5 opacity-40" : "border-white/10 hover:bg-white/5"
+                      done ? "border-fg/5 opacity-40" : "border-fg/10 hover:bg-fg/5"
                     }`}
                   >
                     <button
@@ -424,13 +424,13 @@ function Index() {
                         style={{ color: SIDES[s].color }}
                       >
                         Quadrados de {SIDES[s].label}{" "}
-                        <span className="font-normal text-white/50">({SIDES[s].desc})</span>
+                        <span className="font-normal text-fg/50">({SIDES[s].desc})</span>
                       </p>
-                      <p className="text-xs text-white/60">
+                      <p className="text-xs text-fg/60">
                         {done ? "Quadrado completo!" : `${remaining} restantes`}
                       </p>
                     </div>
-                    <div className="h-2 w-16 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-2 w-16 overflow-hidden rounded-full bg-fg/10">
                       <div
                         className="h-full rounded-full transition-all duration-300"
                         style={{
@@ -445,7 +445,7 @@ function Index() {
                       onClick={() => removeLast(s)}
                       aria-label={`Devolver o último quadradinho de ${SIDES[s].label}`}
                       title="Devolver o último quadradinho"
-                      className="rounded-md border border-white/10 p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="rounded-md border border-fg/10 p-1.5 text-fg/60 transition hover:bg-fg/10 hover:text-fg disabled:opacity-30 disabled:hover:bg-transparent"
                     >
                       <Undo2 className="h-4 w-4" aria-hidden />
                     </button>
@@ -458,26 +458,26 @@ function Index() {
           {/* Fórmula / resultado */}
           <div
             className={`relative overflow-hidden rounded-2xl border p-5 transition-colors ${
-              complete ? "border-brand/60 bg-brand/10" : "border-white/10 bg-white/[0.03]"
+              complete ? "border-brand/60 bg-brand/10" : "border-fg/10 bg-fg/[0.03]"
             }`}
             aria-live="polite"
           >
             {complete && (
               <div className="animate-glow-pulse pointer-events-none absolute inset-0 bg-gradient-to-r from-brand/20 via-cyan-accent/20 to-brand/20" />
             )}
-            <p className="relative text-[11px] uppercase tracking-[0.2em] text-white/50">
+            <p className="relative text-[11px] uppercase tracking-[0.2em] text-fg/50">
               {complete ? "O momento pitagórico" : "A fórmula"}
             </p>
             <div className="relative mt-3 flex items-end justify-center gap-3 font-display text-4xl font-bold">
               <span className="text-catet1">{filled.a}</span>
-              <span className="pb-0.5 text-2xl text-white/50">+</span>
+              <span className="pb-0.5 text-2xl text-fg/50">+</span>
               <span className="text-catet2">{filled.b}</span>
-              <span className="pb-0.5 text-2xl text-white/50">{complete ? "=" : "?"}</span>
+              <span className="pb-0.5 text-2xl text-fg/50">{complete ? "=" : "?"}</span>
               <span className="text-brand">{complete ? filled.c : "?"}</span>
             </div>
-            <p className="relative mt-3 text-center text-sm text-white/60">
+            <p className="relative mt-3 text-center text-sm text-fg/60">
               {complete ? (
-                <span className="inline-flex items-center gap-2 font-medium text-white">
+                <span className="inline-flex items-center gap-2 font-medium text-fg">
                   <Sparkles className="h-4 w-4 text-cyan-accent" aria-hidden />
                   {total("a")} + {total("b")} = {total("c")} — os catetos enchem a hipotenusa. a² +
                   b² = c²!
@@ -489,9 +489,9 @@ function Index() {
           </div>
 
           {/* Passos */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="rounded-2xl border border-fg/10 bg-fg/[0.03] p-5">
             <p className="font-display font-semibold">Como Pitágoras pensou</p>
-            <ol className="mt-3 space-y-3 text-sm text-white/60">
+            <ol className="mt-3 space-y-3 text-sm text-fg/60">
               {[
                 {
                   n: 1,

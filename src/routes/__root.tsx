@@ -10,6 +10,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { THEME_INIT_SCRIPT } from "../lib/theme";
 
 const SITE_URL = "https://pythagoras-square-play.lovable.app";
 
@@ -19,7 +20,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="font-display text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm text-fg/60">
           A página que você procura não existe ou foi movida.
         </p>
         <div className="mt-6">
@@ -48,7 +49,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           Esta página não carregou
         </h1>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm text-fg/60">
           Algo deu errado do nosso lado. Tente de novo ou volte para o início.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -97,6 +98,9 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    // HeadContent renderiza estes scripts dentro do <head>, antes da primeira pintura,
+    // para não piscar o tema errado.
+    scripts: [{ children: THEME_INIT_SCRIPT }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -105,8 +109,9 @@ export const Route = createRootRoute({
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // data-theme é definido pelo script inline; suppressHydrationWarning evita aviso no dev.
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

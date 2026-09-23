@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { PageShell, PageLinks } from "@/components/PageShell";
 import { useWindowDrag, clientToSvg } from "@/hooks/use-window-drag";
 import { deg } from "@/lib/format";
-import { C, white } from "@/lib/theme";
+import { C, fg } from "@/lib/theme";
 
 export const Route = createFileRoute("/produtos-vetoriais")({
   head: () => ({
@@ -115,9 +115,9 @@ function ProdutosVetoriais() {
       intro="Arraste as setas A e B pela ponta ou pelo corpo, ou digite as coordenadas. O produto escalar mede o alinhamento; o produto vetorial mede a área orientada entre eles e aponta para fora do plano."
     >
       <div className="mt-9 grid items-start gap-7 lg:grid-cols-[minmax(0,3fr)_minmax(300px,2fr)]">
-        <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-6">
+        <section className="rounded-3xl border border-fg/10 bg-fg/[0.03] p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs uppercase tracking-[0.18em] text-white/50">Plano cartesiano</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-fg/50">Plano cartesiano</p>
             <div className="flex flex-wrap items-center gap-4 text-sm" aria-live="polite">
               <span className="text-catet1">
                 A = ({a.x}, {a.y})
@@ -166,15 +166,15 @@ function ProdutosVetoriais() {
             </defs>
             {Array.from({ length: 11 }, (_, index) => index - 5).map((value) => (
               <g key={value}>
-                <line x1={sx(value)} y1={20} x2={sx(value)} y2={SIZE - 20} stroke={white(6)} />
-                <line x1={20} y1={sy(value)} x2={SIZE - 20} y2={sy(value)} stroke={white(6)} />
+                <line x1={sx(value)} y1={20} x2={sx(value)} y2={SIZE - 20} stroke={fg(6)} />
+                <line x1={20} y1={sy(value)} x2={SIZE - 20} y2={sy(value)} stroke={fg(6)} />
                 {value !== 0 && (
                   <>
                     <text
                       x={sx(value)}
                       y={CENTER + 20}
                       textAnchor="middle"
-                      fill={white(45)}
+                      fill={fg(45)}
                       fontSize="11"
                     >
                       {value}
@@ -183,7 +183,7 @@ function ProdutosVetoriais() {
                       x={CENTER - 13}
                       y={sy(value) + 4}
                       textAnchor="end"
-                      fill={white(45)}
+                      fill={fg(45)}
                       fontSize="11"
                     >
                       {value}
@@ -192,8 +192,8 @@ function ProdutosVetoriais() {
                 )}
               </g>
             ))}
-            <line x1={20} y1={CENTER} x2={SIZE - 20} y2={CENTER} stroke={white(25)} />
-            <line x1={CENTER} y1={20} x2={CENTER} y2={SIZE - 20} stroke={white(25)} />
+            <line x1={20} y1={CENTER} x2={SIZE - 20} y2={CENTER} stroke={fg(25)} />
+            <line x1={CENTER} y1={20} x2={CENTER} y2={SIZE - 20} stroke={fg(25)} />
 
             <polygon
               points={`${CENTER},${CENTER} ${sx(a.x)},${sy(a.y)} ${sx(c.x)},${sy(c.y)} ${sx(b.x)},${sy(b.y)}`}
@@ -288,7 +288,7 @@ function ProdutosVetoriais() {
 
             <circle cx={CENTER} cy={CENTER} r="5" fill={C.vecSum} />
           </svg>
-          <p className="mt-3 text-center text-xs text-white/50">
+          <p className="mt-3 text-center text-xs text-fg/50">
             O vetor rosa <span className="text-vec-sum">C = A + B</span> é a diagonal e termina
             exatamente no vértice oposto do paralelogramo.
           </p>
@@ -297,13 +297,13 @@ function ProdutosVetoriais() {
             {(["a", "b"] as const).map((id) => (
               <fieldset
                 key={id}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 px-3 py-2 text-sm"
+                className="flex flex-wrap items-center gap-3 rounded-xl border border-fg/10 px-3 py-2 text-sm"
               >
                 <legend className={`px-1 font-semibold ${STYLE[id].textClass}`}>
                   Vetor {STYLE[id].label} pelo teclado
                 </legend>
                 {(["x", "y"] as const).map((axis) => (
-                  <label key={axis} className="flex items-center gap-2 text-white/60">
+                  <label key={axis} className="flex items-center gap-2 text-fg/60">
                     <span className="font-mono">{axis}</span>
                     <input
                       type="number"
@@ -312,7 +312,7 @@ function ProdutosVetoriais() {
                       max={LIMIT}
                       value={vec[id][axis]}
                       onChange={(e) => setCoord(id, axis, e.target.value)}
-                      className="w-16 rounded-md border border-white/15 bg-white/5 px-2 py-1 text-white tabular-nums focus:border-brand focus:outline-none"
+                      className="w-16 rounded-md border border-fg/15 bg-fg/5 px-2 py-1 text-fg tabular-nums focus:border-brand focus:outline-none"
                     />
                   </label>
                 ))}
@@ -334,17 +334,17 @@ function ProdutosVetoriais() {
               <span className="rounded bg-catet1/15 px-2 py-1 text-catet1">
                 {a.x} × {b.x}
               </span>
-              <span className="text-white/50">+</span>
+              <span className="text-fg/50">+</span>
               <span className="rounded bg-cyan-accent/15 px-2 py-1 text-cyan-accent">
                 {a.y} × {b.y}
               </span>
             </div>
-            <p className="mt-3 text-center text-sm text-white/60">
+            <p className="mt-3 text-center text-sm text-fg/60">
               <span className="text-catet1">{dotX}</span> +{" "}
               <span className="text-cyan-accent">{dotY}</span> ={" "}
-              <strong className="text-white">{dot}</strong>
+              <strong className="text-fg">{dot}</strong>
             </p>
-            <p className="mt-3 text-xs text-white/50">
+            <p className="mt-3 text-xs text-fg/50">
               {angle === null
                 ? "Ângulo entre A e B: indefinido, porque um dos vetores é nulo."
                 : `Ângulo entre A e B: ${deg(angle)}. Quanto maior o alinhamento, maior o resultado.`}
@@ -359,29 +359,31 @@ function ProdutosVetoriais() {
               <p className="font-display font-semibold text-catet2">Produto vetorial 2D</p>
               <span className="text-2xl font-bold text-catet2">{cross}</span>
             </div>
-            <div className="mt-4 grid grid-cols-[auto_1fr] items-center justify-center gap-x-3 gap-y-1 font-mono text-base">
-              <span className="row-span-2 text-3xl text-white/30">|</span>
-              <div className="flex gap-3">
+            {/* determinante 2×2, com colunas e linhas bem separadas */}
+            <div className="mt-6 flex items-center justify-center gap-4 font-mono text-lg">
+              <span className="h-16 w-px bg-fg/30" aria-hidden />
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-center tabular-nums">
                 <span className="text-catet1">{a.x}</span>
                 <span className="text-cyan-accent">{a.y}</span>
-              </div>
-              <div className="flex gap-3">
                 <span className="text-catet2">{b.x}</span>
                 <span className="text-brand">{b.y}</span>
               </div>
+              <span className="h-16 w-px bg-fg/30" aria-hidden />
             </div>
-            <p className="mt-3 text-center text-sm text-white/60">
+            <p className="mt-6 text-center text-base leading-loose text-fg/60">
               <span className="text-catet1">{a.x}</span> × <span className="text-brand">{b.y}</span>{" "}
               − <span className="text-cyan-accent">{a.y}</span> ×{" "}
-              <span className="text-catet2">{b.x}</span> ={" "}
-              <strong className="text-catet2">
-                {crossFirst} − {crossSecond} = {cross}
-              </strong>
+              <span className="text-catet2">{b.x}</span>
+              <br />
+              <span className="text-catet2">
+                {crossFirst} − {crossSecond}
+              </span>{" "}
+              = <strong className="text-catet2">{cross}</strong>
             </p>
-            <p className="mt-3 rounded bg-vec-sum/15 px-3 py-2 text-center text-sm font-semibold text-vec-sum">
+            <p className="mt-6 rounded-lg bg-vec-sum/15 px-4 py-3 text-center text-sm font-semibold text-vec-sum">
               Resultante perpendicular: A × B = {cross}k̂
             </p>
-            <p className="mt-3 text-xs text-white/50">
+            <p className="mt-5 text-xs leading-relaxed text-fg/50">
               O módulo, {Math.abs(cross)}, é a área do paralelogramo. O sinal indica o sentido da
               rotação de A para B.
             </p>

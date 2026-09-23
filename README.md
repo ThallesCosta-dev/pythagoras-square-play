@@ -16,6 +16,7 @@ transformers, em quatro telas:
 
 - [TanStack Start](https://tanstack.com/start) + React 19, com roteamento por arquivos em `src/routes/`
 - Tailwind CSS 4 (tokens em `src/styles.css`, referenciados no TSX via `src/lib/theme.ts`)
+- Tema claro e escuro: segue o sistema por padrão, com botão na barra de navegação e preferência salva no `localStorage`
 - SVG puro para os desenhos interativos, com eventos de ponteiro (`src/hooks/use-window-drag.ts`)
 - Build com Vite e Nitro (preset Cloudflare)
 
