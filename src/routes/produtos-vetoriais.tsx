@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { PageShell, PageLinks } from "@/components/PageShell";
 import { useWindowDrag, clientToSvg } from "@/hooks/use-window-drag";
-import { deg } from "@/lib/format";
+import { deg, fmt } from "@/lib/format";
 import { C, fg } from "@/lib/theme";
 
 export const Route = createFileRoute("/produtos-vetoriais")({
@@ -37,9 +37,16 @@ const sx = (x: number) => CENTER + x * UNIT;
 const sy = (y: number) => CENTER - y * UNIT;
 const clampLabel = (value: number) => Math.max(32, Math.min(SIZE - 32, value));
 
-/** Mantém a coordenada em [-5, 5] e garante que a soma com o outro vetor também fique no grid. */
-const clampWithSum = (value: number, other: number) =>
-  Math.max(-LIMIT, Math.min(LIMIT, Math.max(-LIMIT - other, Math.min(LIMIT - other, value))));
+/** Limites de uma coordenada: ela fica em [-5, 5] e a soma com o outro vetor também. */
+const bounds = (other: number) => ({
+  min: Math.max(-LIMIT, -LIMIT - other),
+  max: Math.min(LIMIT, LIMIT - other),
+});
+const clampWithSum = (value: number, other: number) => {
+  const { min, max } = bounds(other);
+  return Math.max(min, Math.min(max, value));
+};
+const otherId = (id: VectorId): VectorId => (id === "a" ? "b" : "a");
 
 const isZero = (v: Vector) => v.x === 0 && v.y === 0;
 
@@ -51,6 +58,7 @@ const STYLE: Record<VectorId, { color: string; label: string; textClass: string 
 function ProdutosVetoriais() {
   const [vec, setVec] = useState<Vectors>({ a: { x: 4, y: 2 }, b: { x: 1, y: 3 } });
   const [dragging, setDragging] = useState<VectorId | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const { a, b } = vec;
@@ -61,16 +69,16 @@ function ProdutosVetoriais() {
   const crossSecond = a.y * b.x;
   const cross = crossFirst - crossSecond;
   const c = { x: a.x + b.x, y: a.y + b.y };
+  const lenA = Math.hypot(a.x, a.y);
+  const lenB = Math.hypot(b.x, b.y);
   const anyZero = isZero(a) || isZero(b);
-  const angle = anyZero
-    ? null
-    : Math.acos(Math.max(-1, Math.min(1, dot / (Math.hypot(a.x, a.y) * Math.hypot(b.x, b.y)))));
+  const angle = anyZero ? null : Math.acos(Math.max(-1, Math.min(1, dot / (lenA * lenB))));
 
   // Atualiza um vetor a partir do estado mais recente, para que o limite da soma use o valor
   // atual do outro vetor (e não o valor capturado quando o arraste começou).
   const updateVector = (id: VectorId, next: Vector) =>
     setVec((prev) => {
-      const other = id === "a" ? prev.b : prev.a;
+      const other = prev[otherId(id)];
       const clamped = { x: clampWithSum(next.x, other.x), y: clampWithSum(next.y, other.y) };
       const current = prev[id];
       return clamped.x === current.x && clamped.y === current.y ? prev : { ...prev, [id]: clamped };
@@ -100,7 +108,16 @@ function ProdutosVetoriais() {
 
   const setCoord = (id: VectorId, axis: "x" | "y", value: string) => {
     const n = Number(value);
-    if (Number.isFinite(n)) updateVector(id, { ...vec[id], [axis]: Math.round(n) });
+    if (value.trim() === "" || !Number.isFinite(n)) return;
+    const wanted = Math.round(n);
+    const other = vec[otherId(id)][axis];
+    const got = clampWithSum(wanted, other);
+    setNotice(
+      got === wanted
+        ? null
+        : `${STYLE[id].label}.${axis} ficou em ${got}: com ${STYLE[otherId(id)].label}.${axis} = ${other}, um valor ${wanted} levaria a soma C para fora do plano (de −${LIMIT} a ${LIMIT}).`,
+    );
+    updateVector(id, { ...vec[id], [axis]: got });
   };
 
   return (
@@ -112,7 +129,7 @@ function ProdutosVetoriais() {
           <span className="text-catet2">vetorial</span>
         </>
       }
-      intro="Arraste as setas A e B pela ponta ou pelo corpo, ou digite as coordenadas. O produto escalar mede o alinhamento; o produto vetorial mede a área orientada entre eles e aponta para fora do plano."
+      intro="Arraste as setas A e B pela ponta ou pelo corpo, ou digite as coordenadas. O produto escalar combina o alinhamento com os comprimentos (A · B = |A| · |B| · cos θ); o produto vetorial mede a área orientada do paralelogramo formado por A e B e aponta para fora do plano."
     >
       <div className="mt-9 grid items-start gap-7 lg:grid-cols-[minmax(0,3fr)_minmax(300px,2fr)]">
         <section className="rounded-3xl border border-fg/10 bg-fg/[0.03] p-4 sm:p-6">
@@ -302,23 +319,34 @@ function ProdutosVetoriais() {
                 <legend className={`px-1 font-semibold ${STYLE[id].textClass}`}>
                   Vetor {STYLE[id].label} pelo teclado
                 </legend>
-                {(["x", "y"] as const).map((axis) => (
-                  <label key={axis} className="flex items-center gap-2 text-fg/60">
-                    <span className="font-mono">{axis}</span>
-                    <input
-                      type="number"
-                      step={1}
-                      min={-LIMIT}
-                      max={LIMIT}
-                      value={vec[id][axis]}
-                      onChange={(e) => setCoord(id, axis, e.target.value)}
-                      className="w-16 rounded-md border border-fg/15 bg-fg/5 px-2 py-1 text-fg tabular-nums focus:border-brand focus:outline-none"
-                    />
-                  </label>
-                ))}
+                {(["x", "y"] as const).map((axis) => {
+                  const { min, max } = bounds(vec[otherId(id)][axis]);
+                  return (
+                    <label key={axis} className="flex items-center gap-2 text-fg/60">
+                      <span className="font-mono">{axis}</span>
+                      <input
+                        type="number"
+                        step={1}
+                        min={min}
+                        max={max}
+                        title={`De ${min} a ${max}, para a soma C caber no plano`}
+                        value={vec[id][axis]}
+                        onChange={(e) => setCoord(id, axis, e.target.value)}
+                        className="w-16 rounded-md border border-fg/15 bg-fg/5 px-2 py-1 text-fg tabular-nums focus:border-brand focus:outline-none"
+                      />
+                    </label>
+                  );
+                })}
               </fieldset>
             ))}
           </div>
+          <p className="mt-2 text-xs text-fg/50">
+            Cada coordenada vai de −{LIMIT} a {LIMIT}, e a soma C também precisa caber no plano. Por
+            isso o limite de A depende de B, e vice-versa.
+          </p>
+          <p role="status" aria-live="polite" className="mt-1 min-h-4 text-xs text-catet1">
+            {notice}
+          </p>
         </section>
 
         <aside className="space-y-4">
@@ -344,11 +372,24 @@ function ProdutosVetoriais() {
               <span className="text-cyan-accent">{dotY}</span> ={" "}
               <strong className="text-fg">{dot}</strong>
             </p>
-            <p className="mt-3 text-xs text-fg/50">
-              {angle === null
-                ? "Ângulo entre A e B: indefinido, porque um dos vetores é nulo."
-                : `Ângulo entre A e B: ${deg(angle)}. Quanto maior o alinhamento, maior o resultado.`}
-            </p>
+            {angle === null ? (
+              <p className="mt-3 text-xs text-fg/50">
+                Ângulo entre A e B: indefinido, porque um dos vetores é nulo.
+              </p>
+            ) : (
+              <>
+                <p className="mt-3 text-center text-sm text-fg/60">
+                  |A| · |B| · cos θ = {fmt(lenA)} × {fmt(lenB)} × cos {deg(angle)} ={" "}
+                  <strong className="text-fg">{fmt(lenA * lenB * Math.cos(angle))}</strong>
+                </p>
+                <p className="mt-3 text-xs text-fg/50">
+                  Aqui θ é o menor ângulo entre A e B (de 0° a 180°). O resultado depende do ângulo
+                  e também dos comprimentos: com |A| e |B| fixos, quanto mais alinhados, maior;
+                  vetores mais longos também aumentam o valor. Dividindo por |A| · |B| sobra só o
+                  cos θ, a similaridade da página anterior.
+                </p>
+              </>
+            )}
           </section>
 
           <section
@@ -381,11 +422,14 @@ function ProdutosVetoriais() {
               = <strong className="text-catet2">{cross}</strong>
             </p>
             <p className="mt-6 rounded-lg bg-vec-sum/15 px-4 py-3 text-center text-sm font-semibold text-vec-sum">
-              Resultante perpendicular: A × B = {cross}k̂
+              Vetor perpendicular ao plano: A × B = (0, 0, {cross}) = {cross}k̂
             </p>
             <p className="mt-5 text-xs leading-relaxed text-fg/50">
-              O módulo, {Math.abs(cross)}, é a área do paralelogramo. O sinal indica o sentido da
-              rotação de A para B.
+              O produto vetorial é definido no espaço. Pensando A e B como vetores com z = 0, o
+              resultado só tem a componente z, que é o determinante acima. O módulo,{" "}
+              {Math.abs(cross)}, é a área do paralelogramo. O sinal diz o sentido da rotação de A
+              para B pelo menor ângulo: positivo se for anti-horária, negativo se for horária, zero
+              se A e B forem paralelos.
             </p>
           </section>
         </aside>
@@ -397,7 +441,7 @@ function ProdutosVetoriais() {
             to: "/similaridade",
             eyebrow: "Passo anterior",
             title: "Cosseno nos transformers",
-            desc: "O produto escalar normalizado virando atenção.",
+            desc: "O produto escalar dividido pelos comprimentos: o cosseno.",
             accent: "brand",
           },
           {

@@ -9,9 +9,12 @@ export const C = {
   catet1: "var(--catet1)",
   catet2: "var(--catet2)",
   vecSum: "var(--vec-sum)",
-  amber: "var(--amber)",
-  orange: "var(--orange)",
-  emerald: "var(--emerald)",
+  word1: "var(--word-1)",
+  word2: "var(--word-2)",
+  word3: "var(--word-3)",
+  word4: "var(--word-4)",
+  word5: "var(--word-5)",
+  word6: "var(--word-6)",
 } as const;
 
 export type ThemeColor = (typeof C)[keyof typeof C];

@@ -3,12 +3,12 @@
 App educacional interativo que parte do Teorema de Pitágoras e chega ao cosseno usado pelos
 transformers, em quatro telas:
 
-| Rota                  | Tela                       | O que se faz                                                                                                                           |
-| --------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                   | Teorema de Pitágoras       | Arraste quadradinhos unitários para dentro dos quadrados construídos sobre os lados de um triângulo 3-4-5 e veja 9 + 16 = 25 aparecer. |
-| `/trigonometria`      | Seno, cosseno e tangente   | Gire um ponto no círculo de raio 1 e acompanhe seno, cosseno e tangente como lados de um triângulo retângulo.                          |
-| `/similaridade`       | Cosseno nos transformers   | Mova um vetor de consulta entre vetores de palavras e veja a similaridade de cosseno virar pesos de atenção.                           |
-| `/produtos-vetoriais` | Produto escalar e vetorial | Arraste dois vetores inteiros e acompanhe produto escalar, produto vetorial 2D e a soma A + B.                                         |
+| Rota                  | Tela                       | O que se faz                                                                                                                                                                                                     |
+| --------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                   | Teorema de Pitágoras       | Encha os quadrados dos catetos de um triângulo 3-4-5 com quadradinhos unitários e leve-os para o quadrado da hipotenusa: 9 + 16 = 25. Depois, a prova por rearranjo, que vale para qualquer triângulo retângulo. |
+| `/trigonometria`      | Seno, cosseno e tangente   | Gire um ponto no círculo de raio 1 e acompanhe seno, cosseno e tangente como lados de um triângulo retângulo.                                                                                                    |
+| `/similaridade`       | Cosseno nos transformers   | Mova um vetor de consulta entre vetores de palavras e veja a similaridade de cosseno virar pesos (softmax). Abaixo, uma cabeça de atenção completa (q, k, v) e a mesma conta com até 8 dimensões.                |
+| `/produtos-vetoriais` | Produto escalar e vetorial | Arraste dois vetores inteiros e acompanhe produto escalar, produto vetorial 2D e a soma A + B.                                                                                                                   |
 
 **App publicado:** https://pythagoras-square-play.lovable.app
 
