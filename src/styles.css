@@ -45,9 +45,6 @@
   --color-vec-sum: var(--vec-sum);
   --color-brand-light: var(--brand-light);
   --color-brand-text: var(--brand-text);
-  --color-amber: var(--amber);
-  --color-orange: var(--orange);
-  --color-emerald: var(--emerald);
   --color-ink: var(--ink);
   --color-fg: var(--fg);
   --font-display: "Space Grotesk", sans-serif;
@@ -71,9 +68,14 @@
   --vec-sum: #f472b6;
   --brand-light: #a5b4fc;
   --brand-text: #c7d2fe;
-  --amber: #f59e0b;
-  --orange: #fb923c;
-  --emerald: #10b981;
+  /* Palavras da tela de similaridade: tons quentes (animais), frios (veículos) e cinza,
+     com matizes bem separados para serem distinguíveis mesmo projetados. */
+  --word-1: #facc15;
+  --word-2: #f97316;
+  --word-3: #f472b6;
+  --word-4: #4ade80;
+  --word-5: #38bdf8;
+  --word-6: #cbd5e1;
   --ink: #0b1020;
 
   --background: oklch(0.155 0.03 275);
@@ -108,9 +110,12 @@
   --vec-sum: #be185d;
   --brand-light: #6366f1;
   --brand-text: #4338ca;
-  --amber: #d97706;
-  --orange: #c2410c;
-  --emerald: #059669;
+  --word-1: #a16207;
+  --word-2: #c2410c;
+  --word-3: #be185d;
+  --word-4: #15803d;
+  --word-5: #0369a1;
+  --word-6: #475569;
   --ink: #f5f6fb;
 
   --background: oklch(0.985 0.004 275);

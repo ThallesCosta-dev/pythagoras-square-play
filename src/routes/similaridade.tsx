@@ -3,7 +3,10 @@ import { RotateCcw } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { PageShell, GradientText, PageLinks } from "@/components/PageShell";
 import { useWindowDrag, clientToSvg } from "@/hooks/use-window-drag";
+import { AttentionHead } from "@/components/similaridade/AttentionHead";
+import { MoreDimensions } from "@/components/similaridade/MoreDimensions";
 import { fmt } from "@/lib/format";
+import { cosSim as cosSimN } from "@/lib/vectors";
 import { C, soft, fg } from "@/lib/theme";
 
 export const Route = createFileRoute("/similaridade")({
@@ -42,12 +45,12 @@ type Positions = Record<KeyId, Vec2>;
 type DragTarget = "q" | KeyId | null;
 
 const KEYS: KeyInfo[] = [
-  { id: "gato", word: "gato", color: C.catet1 },
-  { id: "cachorro", word: "cachorro", color: C.amber },
-  { id: "felino", word: "felino", color: C.orange },
-  { id: "carro", word: "carro", color: C.catet2 },
-  { id: "motor", word: "motor", color: C.emerald },
-  { id: "banco", word: "banco", color: C.cyan },
+  { id: "gato", word: "gato", color: C.word1 },
+  { id: "cachorro", word: "cachorro", color: C.word2 },
+  { id: "felino", word: "felino", color: C.word3 },
+  { id: "carro", word: "carro", color: C.word4 },
+  { id: "motor", word: "motor", color: C.word5 },
+  { id: "banco", word: "banco", color: C.word6 },
 ];
 
 const DEFAULT_QUERY: Vec2 = { x: 3.2, y: 2.0 };
@@ -60,12 +63,8 @@ const DEFAULT_POSITIONS: Positions = {
   banco: { x: 1.0, y: -3.4 },
 };
 
-const dot = (a: Vec2, b: Vec2) => a.x * b.x + a.y * b.y;
 const norm = (a: Vec2) => Math.hypot(a.x, a.y);
-const cosSim = (a: Vec2, b: Vec2) => {
-  const d = norm(a) * norm(b);
-  return d === 0 ? 0 : dot(a, b) / d;
-};
+const cosSim = (a: Vec2, b: Vec2) => cosSimN([a.x, a.y], [b.x, b.y]);
 const clamp = (v: number) => Math.max(-LIMIT, Math.min(LIMIT, v));
 const round1 = (v: number) => Math.round(v * 10) / 10;
 const coords = (v: Vec2) => `(${fmt(v.x, 1)}, ${fmt(v.y, 1)})`;
@@ -122,8 +121,10 @@ function Similaridade() {
   const [dragging, setDragging] = useState<DragTarget>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
+  // Coordenadas arredondadas a 0,1: o que aparece na tela é exatamente o que entra na conta,
+  // então dá para conferir o cosseno à mão.
   const setVector = (target: Exclude<DragTarget, null>, next: Vec2) => {
-    const v = { x: clamp(next.x), y: clamp(next.y) };
+    const v = { x: round1(clamp(next.x)), y: round1(clamp(next.y)) };
     if (target === "q") setQ(v);
     else setPositions((prev) => ({ ...prev, [target]: v }));
   };
@@ -150,7 +151,7 @@ function Similaridade() {
 
   const setCoord = (target: Exclude<DragTarget, null>, axis: "x" | "y", value: string) => {
     const n = Number(value);
-    if (!Number.isFinite(n)) return;
+    if (value.trim() === "" || !Number.isFinite(n)) return;
     const current = target === "q" ? q : positions[target];
     setVector(target, { ...current, [axis]: n });
   };
@@ -168,8 +169,9 @@ function Similaridade() {
         k,
         pos,
         sim,
-        ang: (Math.acos(Math.max(-1, Math.min(1, sim))) * 180) / Math.PI,
-        exp: Math.exp(sim * temp),
+        ang: sim === null ? null : (Math.acos(Math.max(-1, Math.min(1, sim))) * 180) / Math.PI,
+        // Sem cosseno definido, a palavra fica fora do softmax.
+        exp: sim === null ? 0 : Math.exp(sim * temp),
       };
     });
     const sum = sims.reduce((a, s) => a + s.exp, 0) || 1;
@@ -177,9 +179,12 @@ function Similaridade() {
   }, [q, positions, temp]);
 
   type Row = (typeof rows)[number];
-  const best = rows.reduce<Row | null>((a, b) => (a && a.w > b.w ? a : b), null);
+  const best = rows
+    .filter((r) => r.sim !== null)
+    .reduce<Row | null>((a, b) => (a && a.w > b.w ? a : b), null);
   const qLen = norm(q);
   const showWedge = best !== null && qLen > 0.05 && norm(best.pos) > 0.05;
+  const hasNullKey = rows.some((r) => r.sim === null);
 
   return (
     <PageShell
@@ -193,9 +198,11 @@ function Similaridade() {
       intro={
         <>
           Num modelo de linguagem, cada palavra vira um vetor. Para decidir em quais palavras
-          prestar atenção, o modelo compara a consulta com cada palavra. Aqui usamos o{" "}
-          <span className="text-fg">cosseno do ângulo</span> entre elas: mesmo sentido → cosseno
-          perto de 1. Arraste a seta roxa da consulta ou qualquer palavra, ou edite as coordenadas.
+          prestar atenção, o modelo compara uma consulta com cada palavra usando o produto escalar,
+          q · k = |q| · |k| · cos θ. Aqui ficamos só com o{" "}
+          <span className="text-fg">cosseno do ângulo</span>: apontando para o mesmo lado → perto de
+          1; perpendiculares → 0; opostos → −1. Arraste a seta roxa da consulta ou qualquer palavra,
+          ou edite as coordenadas.
         </>
       }
     >
@@ -244,10 +251,12 @@ function Similaridade() {
 
               {/* setor entre q e a palavra mais parecida */}
               {showWedge && (
+                // No SVG o y cresce para baixo: sweep 0 gira no sentido anti-horário da tela. Se a
+                // palavra está no sentido anti-horário a partir de q (produto vetorial > 0), use 0.
                 <path
                   d={`M ${CX} ${CY} L ${sx((q.x / qLen) * 1.6)} ${sy((q.y / qLen) * 1.6)} A ${
                     1.6 * U
-                  } ${1.6 * U} 0 0 ${q.x * best.pos.y - q.y * best.pos.x > 0 ? 1 : 0} ${sx(
+                  } ${1.6 * U} 0 0 ${q.x * best.pos.y - q.y * best.pos.x > 0 ? 0 : 1} ${sx(
                     (best.pos.x / norm(best.pos)) * 1.6,
                   )} ${sy((best.pos.y / norm(best.pos)) * 1.6)} Z`}
                   fill={soft(C.brand, 18)}
@@ -348,14 +357,14 @@ function Similaridade() {
 
             <p className="mt-3 text-sm text-fg/60">
               Repare: aqui só o <em>ângulo</em> importa. Alongue uma seta sem girá-la e o cosseno
-              não muda — o cosseno mede sentido, não tamanho.
+              não muda: o cosseno mede a orientação (direção e sentido), não o tamanho.
             </p>
 
             {/* edição manual */}
             <div className="mt-5 rounded-2xl border border-fg/10 bg-fg/[0.02] p-4">
               <p className="font-display text-sm font-semibold">Editar coordenadas</p>
               <p className="mt-1 text-xs text-fg/50">
-                Os mesmos vetores do desenho. Valores entre −5,3 e 5,3.
+                Os mesmos vetores do desenho. Valores entre −5,3 e 5,3, com uma casa decimal.
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <div className="flex flex-wrap items-center gap-2 rounded-lg border border-brand/40 bg-brand/10 px-3 py-2 sm:col-span-2">
@@ -395,7 +404,7 @@ function Similaridade() {
           <div className="rounded-2xl border border-fg/10 bg-fg/[0.03] p-5">
             <div className="flex items-baseline justify-between">
               <p className="font-display font-semibold">Atenção do modelo</p>
-              <p className="text-xs text-fg/50">softmax(cos · escala)</p>
+              <p className="text-xs text-fg/50">softmax(cos · nitidez)</p>
             </div>
             <div className="mt-4 space-y-3" aria-live="polite">
               {[...rows]
@@ -408,14 +417,20 @@ function Similaridade() {
                         <span className="text-xs font-normal text-fg/50">{coords(pos)}</span>
                       </span>
                       <span className="tabular-nums text-fg/60">
-                        cos {fmt(sim)} · {fmt(ang, 0)}° ·{" "}
-                        <span className="text-fg">{fmt(w * 100, 0)}%</span>
+                        {sim === null || ang === null ? (
+                          "cos indefinido · fora da conta"
+                        ) : (
+                          <>
+                            cos {fmt(sim)} · {fmt(ang, 0)}° ·{" "}
+                            <span className="text-fg">{fmt(w * 100, 0)}%</span>
+                          </>
+                        )}
                       </span>
                     </div>
                     <div className="mt-1 h-2 overflow-hidden rounded-full bg-fg/10">
                       <div
                         className="h-full rounded-full transition-all duration-200"
-                        style={{ width: `${w * 100}%`, backgroundColor: k.color }}
+                        style={{ width: `${(w * 100).toFixed(2)}%`, backgroundColor: k.color }}
                       />
                     </div>
                   </div>
@@ -437,16 +452,33 @@ function Similaridade() {
               onChange={(e) => setTemp(Number(e.target.value))}
               className="mt-2 w-full accent-brand"
             />
+            <p className="mt-2 text-xs text-fg/50">
+              A nitidez multiplica os cossenos antes do softmax: quanto maior, mais a atenção se
+              concentra na palavra mais parecida. Os pesos sempre somam 100% (na lista,
+              arredondados).
+            </p>
           </div>
 
           <div className="rounded-2xl border border-brand/50 bg-brand/10 p-5">
             <p className="text-[11px] uppercase tracking-[0.2em] text-fg/50">Leitura</p>
-            <p className="mt-2 text-sm text-fg/70">
-              A consulta aponta mais para <strong className="text-fg">{best?.k.word}</strong>{" "}
-              (ângulo de {fmt(best?.ang ?? 0, 0)}°), então o modelo puxa{" "}
-              {fmt(best ? best.w * 100 : 0, 0)}% da informação dessa palavra ao formar a próxima
-              representação.
-            </p>
+            {best === null || best.ang === null ? (
+              <p className="mt-2 text-sm text-fg/70">
+                {qLen < 1e-9
+                  ? "A consulta é o vetor nulo: sem direção, não há ângulo com nenhuma palavra e o cosseno fica indefinido. Mova a consulta para ver a atenção."
+                  : "Todas as palavras estão no vetor nulo: sem direção, não há ângulo e o cosseno fica indefinido."}
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-fg/70">
+                A consulta aponta mais para <strong className="text-fg">{best.k.word}</strong>{" "}
+                (ângulo de {fmt(best.ang, 0)}°), então essa palavra recebe {fmt(best.w * 100, 0)}%
+                do peso da atenção ao formar a próxima representação.
+              </p>
+            )}
+            {hasNullKey && best !== null && (
+              <p className="mt-2 text-xs text-fg/50">
+                Palavras no vetor nulo não têm ângulo com a consulta e ficam fora do softmax.
+              </p>
+            )}
           </div>
 
           <div className="rounded-2xl border border-fg/10 bg-fg/[0.03] p-5 text-sm text-fg/60">
@@ -459,15 +491,26 @@ function Similaridade() {
               No transformer real, a atenção usa q · k dividido por √d e passa por softmax, sem
               dividir pelos comprimentos: lá o tamanho dos vetores também pesa. Nesta demo
               normalizamos de propósito para isolar o ângulo, e o que sobra é exatamente a
-              similaridade de cosseno: um número entre −1 (sentidos opostos) e 1 (mesma direção).
+              similaridade de cosseno: um número que vai de −1 (mesma direção, sentidos opostos),
+              passando por 0 (perpendiculares), até 1 (mesma direção e mesmo sentido).
+            </p>
+            <p className="mt-3">
+              Neste plano, cada seta faz o papel de chave e a consulta é uma seta solta. Mais
+              abaixo, em <em>Por dentro de uma cabeça de atenção</em>, está a conta completa: cada
+              palavra gera consulta, chave e valor (<em>query</em>, <em>key</em>, <em>value</em>).
             </p>
             <p className="mt-3 text-fg/50">
-              Aqui usamos 2 dimensões para caber na tela; um modelo real usa centenas ou milhares —
-              a conta é idêntica.
+              Usamos 2 dimensões para caber na tela; um modelo real usa centenas ou milhares. Em{" "}
+              <em>E com mais dimensões?</em>, lá embaixo, dá para ver a mesma conta com até 8.
             </p>
           </div>
         </aside>
       </div>
+
+      <AttentionHead
+        words={KEYS.map((k) => ({ ...k, x: [positions[k.id].x, positions[k.id].y] }))}
+      />
+      <MoreDimensions />
 
       <PageLinks
         links={[
